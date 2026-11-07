@@ -1,15 +1,23 @@
-import { createMemo, createSignal, For, onCleanup, onMount, Show } from "solid-js";
-import type { DatasetProp } from "#/src/lib/config";
+import { createEffect, createMemo, createSignal, For, on, onCleanup, onMount, Show } from "solid-js";
+import { EXTRA_DEFINITIONS_TOGGLE_KEY, type DatasetProp } from "#/src/lib/config";
 import { isHtmlEffectivelyEmpty, parseHtml, removeBrInsideStyleTag } from "#/src/lib/dom";
 import { useAnkiFieldContext } from "#/src/contexts/AnkiFieldsContext";
 import { useConfigContext } from "#/src/contexts/ConfigContext";
-import { DefinitionPictureSection } from "./DefinitionPictureSection";
-import { ExternalLinks } from "./ExternalLinks";
+
+type DefinitionPage = { name: string; html: string };
 
 export function Definition() {
-  const [$modalRef, $setModalRef] = createSignal<HTMLDialogElement>();
   const { $ankiFields } = useAnkiFieldContext();
   const { $config } = useConfigContext();
+  const [$extraVisible, $setExtraVisible] = createSignal(false);
+
+  createEffect(
+    on(
+      () => $ankiFields.CardID,
+      () => $setExtraVisible(false),
+      { defer: true },
+    ),
+  );
 
   const $glossary = createMemo(() => {
     // empty glossary if it's the same as main definition
@@ -33,14 +41,31 @@ export function Definition() {
       : "";
   });
 
-  const $pages = createMemo(() => {
-    const p: { name: string; html: string }[] = [];
+  const $ru = createMemo(() => {
+    return !isHtmlEffectivelyEmpty($ankiFields.RuDefinition)
+      ? removeBrInsideStyleTag($ankiFields.RuDefinition)
+      : "";
+  });
+
+  const $eng = createMemo(() => {
+    return !isHtmlEffectivelyEmpty($ankiFields.EngDefinition)
+      ? removeBrInsideStyleTag($ankiFields.EngDefinition)
+      : "";
+  });
+
+  const $misc = createMemo(() => {
+    return !isHtmlEffectivelyEmpty($ankiFields.MiscInfo)
+      ? removeBrInsideStyleTag($ankiFields.MiscInfo)
+      : "";
+  });
+
+  const $primaryPages = createMemo(() => {
+    const p: DefinitionPage[] = [];
     const selection = $selection();
     const main = $main();
-    const glossary = $glossary();
 
     if ($config.definitionStyle === "single-page") {
-      const combined = [selection, main, glossary].filter(Boolean);
+      const combined = [selection, main].filter(Boolean);
       if (combined.length > 0) {
         const html = combined.join('<div class="divider my-4"></div>');
         p.push({ name: "Определение", html });
@@ -64,6 +89,14 @@ export function Definition() {
       p.push({ name, html: main });
     }
 
+    return p;
+  });
+
+  const $extraCenterPages = createMemo(() => {
+    const p: DefinitionPage[] = [];
+    const glossary = $glossary();
+    const misc = $misc();
+
     if (!isHtmlEffectivelyEmpty(glossary)) {
       const doc = parseHtml(glossary);
       const entries = doc.querySelectorAll("li[data-dictionary]");
@@ -80,7 +113,7 @@ export function Definition() {
         }
         for (const [name, html] of dictGroups) {
           p.push({
-            name: name,
+            name,
             html: `<div style="text-align: left;" class="yomitan-glossary"><ol>${styles}${html}</ol></div>`,
           });
         }
@@ -89,12 +122,16 @@ export function Definition() {
       }
     }
 
+    if (misc) {
+      p.push({ name: "Доп. информация", html: misc });
+    }
+
     if ($config.definitionStyle === "glossary-split") {
       for (const item of p) {
         const doc = parseHtml(item.html);
         const iEl = doc.querySelector("i:first-child");
         if (!(iEl instanceof HTMLElement)) continue;
-        if (iEl?.textContent === `(${item.name})`) {
+        if (iEl.textContent === `(${item.name})`) {
           iEl.style.display = "none";
         }
         item.html = doc.body.innerHTML;
@@ -104,118 +141,133 @@ export function Definition() {
     return p;
   });
 
-  const [$definitionIndex, $setDefinitionIndex] = createSignal(0);
-  const currentPage = () => $pages()[$definitionIndex()];
-
-  function changePage(direction: 1 | -1) {
-    if ($pages().length === 0) return;
-    $setDefinitionIndex((prev) => (prev + direction + $pages().length) % $pages().length);
-  }
+  const $hasExtraSides = createMemo(() => Boolean($ru() || $eng()));
+  const $hasExtraCenter = createMemo(() => $extraCenterPages().length > 0);
+  const $hasExtras = createMemo(() => $hasExtraSides() || $hasExtraCenter());
+  const $showExtras = createMemo(
+    () => $config.extraDefinitionsVisibility === "always" || $extraVisible(),
+  );
+  const $showSides = createMemo(() => $showExtras() && $hasExtraSides());
 
   onMount(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === $config.keybindDefinitionPrev) changePage(-1);
-      if (e.key === $config.keybindDefinitionNext) changePage(1);
+      if ($config.extraDefinitionsVisibility !== "on-key") return;
+      if (!$hasExtras()) return;
+      if (e.key.toLowerCase() !== EXTRA_DEFINITIONS_TOGGLE_KEY) return;
+      const target = e.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.closest("input, textarea, select, [contenteditable=true]") ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      e.preventDefault();
+      $setExtraVisible((v) => !v);
     };
-
     window.addEventListener("keydown", handler);
     onCleanup(() => window.removeEventListener("keydown", handler));
   });
 
   const $definitionDataset = createMemo<DatasetProp>(() => ({
-    "data-dictionary": currentPage()?.name,
+    "data-dictionary": $primaryPages()[0]?.name ?? $extraCenterPages()[0]?.name,
   }));
 
-  return (
-    <>
-      <Show when={$pages().length > 0}>
-        <div class="animate-fade-in" {...$definitionDataset()}>
-          {$pages().length > 1 && (
-            <div
-              class="flex justify-between text-base-content-calm text-sm cursor-pointer hover:text-base-content transition-colors mb-1 tappable"
-              on:click={() => $modalRef()?.showModal()}
-              on:touchend={(e) => e.stopPropagation()}
-            >
-              <div
-                style={{
-                  color: "var(--dictionary-color, var(--color-base-content-calm)",
-                }}
-              >
-                {currentPage()?.name}
-              </div>
-              <div class="text-base-content-soft">{`${$definitionIndex() + 1}/${$pages().length}`}</div>
-            </div>
-          )}
-          <div
-            class="relative bg-base-200 p-2 sm:p-4 border-s-4 text-base sm:text-xl rounded-lg definition-field"
-            style={{
-              "border-color": "var(--dictionary-color, var(--color-primary)",
-            }}
-            data-definition-style={$config.definitionStyle}
-          >
-            <div class="overflow-auto">
-              <DefinitionPictureSection currentHtml={currentPage()?.html} />
-              <div class="contents" innerHTML={currentPage()?.html}></div>
-            </div>
-            {$pages().length > 1 && (
-              <div class="absolute inset-y-0 left-0 right-0 flex justify-between pointer-events-none">
-                <button
-                  type="button"
-                  class="h-full w-4 sm:w-6 hover:bg-base-content/10 cursor-pointer pointer-events-auto transition-colors rounded-l-lg"
-                  on:click={() => changePage(-1)}
-                  on:touchend={(e) => e.stopPropagation()}
-                />
-                <button
-                  type="button"
-                  class="h-full w-4 sm:w-6 hover:bg-base-content/10 cursor-pointer pointer-events-auto transition-colors rounded-r-lg"
-                  on:click={() => changePage(1)}
-                  on:touchend={(e) => e.stopPropagation()}
-                />
-              </div>
-            )}
-          </div>
-          <div class="flex justify-end mt-2 gap-2">
-            <ExternalLinks />
-          </div>
-        </div>
-      </Show>
+  const $accentPageName = createMemo(() => {
+    if ($selection()) return "Выбранный текст";
+    return $primaryPages()[0]?.name;
+  });
 
-      <dialog class="modal" ref={$setModalRef}>
-        <div class="modal-box max-w-sm max-h-[80svh] flex flex-col p-4 gap-2">
-          <h3 class="font-bold text-lg px-2 text-center">Выберите страницу</h3>
-          <div class="flex flex-col gap-1 overflow-auto p-2">
-            <For each={$pages()}>
-              {(page, i) => (
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-sm justify-start font-normal text-left"
-                  classList={{ "btn-active": i() === $definitionIndex() }}
-                  on:click={() => {
-                    $setDefinitionIndex(i());
-                    $modalRef()?.close();
-                  }}
-                  on:touchend={(e) => e.stopPropagation()}
-                >
-                  <span class="truncate">
-                    {i() + 1}. {page.name}
-                  </span>
-                </button>
+  return (
+    <Show when={$primaryPages().length > 0 || $hasExtras()}>
+      <div
+        classList={{
+          // Full-bleed only in the side-by-side layout; stacked adaptive keeps layout width.
+          "2xl:relative 2xl:left-1/2 2xl:w-screen 2xl:max-w-[100vw] 2xl:-translate-x-1/2 2xl:box-border 2xl:px-4":
+            $showSides(),
+        }}
+      >
+        <div
+          class="mx-auto grid grid-cols-1 gap-2 sm:gap-3"
+          classList={{
+            "2xl:w-full 2xl:grid-cols-[minmax(0,1fr)_minmax(0,calc(var(--layout-max-width)-2rem))_minmax(0,1fr)] 2xl:items-start":
+              $showSides(),
+          }}
+        >
+          <Show when={$showSides()}>
+            <aside class="min-w-0 order-2 2xl:order-1">
+              <Show when={$ru()}>
+                {(html) => <DefinitionCard name="RuDefinition" html={html()} compact />}
+              </Show>
+            </aside>
+          </Show>
+
+          <div
+            class="min-w-0 order-1 2xl:order-2 flex flex-col gap-2 sm:gap-3"
+            {...$definitionDataset()}
+          >
+            <For each={$primaryPages()}>
+              {(page) => (
+                <DefinitionCard
+                  name={page.name}
+                  html={page.html}
+                  accent={page.name === $accentPageName()}
+                />
               )}
             </For>
+
+            <Show when={$showExtras()}>
+              <For each={$extraCenterPages()}>
+                {(page) => <DefinitionCard name={page.name} html={page.html} />}
+              </For>
+            </Show>
           </div>
-          <div class="modal-action mt-2">
-            <form method="dialog">
-              <button class="btn btn-sm" on:touchend={(e) => e.stopPropagation()}>
-                Закрыть
-              </button>
-            </form>
-          </div>
+
+          <Show when={$showSides()}>
+            <aside class="min-w-0 order-3">
+              <Show when={$eng()}>
+                {(html) => <DefinitionCard name="EngDefinition" html={html()} compact />}
+              </Show>
+            </aside>
+          </Show>
         </div>
-        <form method="dialog" class="modal-backdrop">
-          <button on:touchend={(e) => e.stopPropagation()}>Закрыть</button>
-        </form>
-      </dialog>
-    </>
+      </div>
+    </Show>
+  );
+}
+
+function DefinitionCard(props: {
+  name: string;
+  html: string;
+  compact?: boolean;
+  accent?: boolean;
+}) {
+  const { $config } = useConfigContext();
+
+  return (
+    <div data-dictionary={props.name}>
+      <div
+        class="relative bg-base-200 p-2 sm:p-4 border-s-4 rounded-lg definition-field"
+        classList={{
+          "text-sm sm:text-base": props.compact,
+          "text-base sm:text-lg": !props.compact,
+          "misc-info": props.name === "Доп. информация",
+        }}
+        style={{
+          "border-color": props.accent
+            ? "var(--color-primary)"
+            : "var(--dictionary-color, color-mix(in oklab, var(--color-base-content) 22%, transparent))",
+          "background-color": props.accent
+            ? "color-mix(in oklab, var(--color-primary) 12%, var(--color-base-200))"
+            : undefined,
+        }}
+        data-definition-style={$config.definitionStyle}
+      >
+        <div class="overflow-auto">
+          <div class="contents" innerHTML={props.html}></div>
+        </div>
+      </div>
+    </div>
   );
 }
 

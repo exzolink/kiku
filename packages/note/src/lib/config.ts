@@ -1,7 +1,15 @@
 import { defaultConfig } from "./default-config";
 import { objectToCss } from "./dom";
 import type { Logger } from "./logger";
-import { colorBase100Map, type DaisyUITheme, daisyUIThemes } from "./theme";
+import {
+  colorBase100Map,
+  darkThemeBase200,
+  darkThemeBase300,
+  darkThemeSecondary,
+  darkThemeSecondaryContent,
+  type DaisyUITheme,
+  daisyUIThemes,
+} from "./theme";
 
 export type KikuConfig = {
   theme: DaisyUITheme;
@@ -24,6 +32,8 @@ export type KikuConfig = {
   modVertical: boolean;
   definitionStyle: DefinitionStyle;
   definitionPictureFromGlossary: boolean;
+  extraDefinitionsVisibility: ExtraDefinitionsVisibility;
+  sentenceFuriganaAlwaysVisible: boolean;
   relatedExpressionExcludeNewCards: boolean;
   relatedExpressionFallback: boolean;
   fontSizeBaseExpression: TailwindSize;
@@ -49,6 +59,9 @@ export type TailwindSize = (typeof tailwindSize)[number];
 
 export const definitionStyle = ["normal", "single-page", "glossary-split"] as const;
 export type DefinitionStyle = (typeof definitionStyle)[number];
+export const extraDefinitionsVisibility = ["always", "on-key"] as const;
+export type ExtraDefinitionsVisibility = (typeof extraDefinitionsVisibility)[number];
+export const EXTRA_DEFINITIONS_TOGGLE_KEY = "z";
 export const tailwindFontSizeVar = {
   xs: { fontSize: "var(--text-xs)", lineHeight: "var(--text-xs--line-height)" },
   sm: { fontSize: "var(--text-sm)", lineHeight: "var(--text-sm--line-height)" },
@@ -113,6 +126,8 @@ export function validateConfig(config: KikuConfig, logger?: Logger): KikuConfig 
       modVertical: typeof config.modVertical === "boolean" ? config.modVertical : defaultConfig.modVertical,
       definitionStyle: definitionStyle.includes(config.definitionStyle) ? config.definitionStyle : defaultConfig.definitionStyle,
       definitionPictureFromGlossary: typeof config.definitionPictureFromGlossary === "boolean" ? config.definitionPictureFromGlossary : defaultConfig.definitionPictureFromGlossary,
+      extraDefinitionsVisibility: extraDefinitionsVisibility.includes(config.extraDefinitionsVisibility) ? config.extraDefinitionsVisibility : defaultConfig.extraDefinitionsVisibility,
+      sentenceFuriganaAlwaysVisible: typeof config.sentenceFuriganaAlwaysVisible === "boolean" ? config.sentenceFuriganaAlwaysVisible : defaultConfig.sentenceFuriganaAlwaysVisible,
       relatedExpressionExcludeNewCards: typeof config.relatedExpressionExcludeNewCards === "boolean" ? config.relatedExpressionExcludeNewCards : defaultConfig.relatedExpressionExcludeNewCards,
       relatedExpressionFallback: typeof config.relatedExpressionFallback === "boolean" ? config.relatedExpressionFallback : defaultConfig.relatedExpressionFallback,
 
@@ -175,6 +190,10 @@ export type CssVar = {
 
 export type CssVarDark = {
   "--color-base-100": string;
+  "--color-base-200"?: string;
+  "--color-base-300"?: string;
+  "--color-secondary"?: string;
+  "--color-secondary-content"?: string;
 };
 
 export type Dataset = {
@@ -245,6 +264,14 @@ export function getCssVarDark(config: KikuConfig) {
   // oxfmt-ignore
   const cssVar: CssVarDark = {
     "--color-base-100": colorBase100Map[config.themeDark],
+    ...(config.themeDark === "dark"
+      ? {
+          "--color-base-200": darkThemeBase200,
+          "--color-base-300": darkThemeBase300,
+          "--color-secondary": darkThemeSecondary,
+          "--color-secondary-content": darkThemeSecondaryContent,
+        }
+      : {}),
   }
 
   return cssVar;

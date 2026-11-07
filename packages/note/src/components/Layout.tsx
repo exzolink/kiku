@@ -8,11 +8,11 @@ export function Layout(props: { children: JSX.Element }) {
   return (
     <div
       ref={(ref) => $setGeneral("layoutRef", ref)}
-      class="font-cyrillic transition-colors relative"
+      class="font-cyrillic relative"
       lang="ru"
     >
       <div
-        class="flex flex-col gap-2 sm:gap-4 p-2 sm:p-4 bg-base-100 min-h-full mx-auto pt-10 sm:pt-12 pb-24 sm:pb-4 layout-max-width"
+        class="flex flex-col gap-2 sm:gap-4 p-2 sm:p-4 sm:pt-0 pt-0 bg-base-100 min-h-full mx-auto pb-24 sm:pb-4 layout-max-width"
         ref={(ref) => $setGeneral("contentRef", ref)}
       >
         {props.children}

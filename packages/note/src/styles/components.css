@@ -1,10 +1,10 @@
 @layer components {
   .expression-picture-box {
-    @apply flex rounded-lg gap-2 sm:gap-4 flex-col sm:flex-row relative z-10;
+    @apply flex rounded-lg gap-1.5 sm:gap-2 flex-col sm:flex-row relative z-10;
   }
 
   .expression-audio-box {
-    @apply flex-1 bg-base-200 p-4 rounded-lg flex flex-col items-center justify-center min-h-38 sm:min-h-56;
+    @apply flex-1 bg-base-200 p-2 sm:p-3 rounded-lg flex flex-col items-center justify-center min-h-28 sm:min-h-44;
   }
 
   .picture-field-background {
@@ -18,15 +18,12 @@
     justify-content: center;
     @apply [&_*:not(img)]:contents;
     @apply [&_:not(:first-child)]:hidden;
-    @apply relative h-44 sm:h-56 cursor-pointer [&_img]:h-full [&_img]:object-contain [&_img]:hover:filter-none;
+    @apply relative h-36 sm:h-44 cursor-pointer [&_img]:h-full [&_img]:object-contain [&_img]:hover:filter-none;
     &[data-nsfw="true"],
     &[data-tags~="nsfw"],
     &[data-tags~="NSFW"],
     &[data-tags~="Nsfw"] {
       @apply [&_img]:filter [&_img]:blur-lg [&_img]:brightness-50;
-    }
-    &[data-transition="true"] {
-      @apply [&_img]:transition-[filter];
     }
     img[data-nsfw="false"] {
       filter: none;
@@ -79,6 +76,9 @@
       visibility: hidden;
     }
     ruby:hover rt {
+      visibility: visible;
+    }
+    &[data-furigana-always="true"] ruby rt {
       visibility: visible;
     }
   }

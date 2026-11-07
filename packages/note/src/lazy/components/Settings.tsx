@@ -127,7 +127,7 @@ export function Settings() {
             }}
           >
             <div class="mx-auto w-full relative layout-max-width">
-              <div class="flex flex-row gap-2 justify-end animate-fade-in pb-4 px-2 sm:px-4">
+              <div class="flex flex-row gap-2 justify-end pb-4 px-2 sm:px-4">
                 <button
                   class="btn pointer-events-auto"
                   on:click={() => navigateBack()}
@@ -227,7 +227,7 @@ function KikuVersion(props: { latestVersion?: string | null }) {
 }
 
 function Section(props: { children: JSX.Element }) {
-  return <div class="flex flex-col gap-2 sm:gap-4 animate-fade-in relative">{props.children}</div>;
+  return <div class="flex flex-col gap-2 sm:gap-4 relative">{props.children}</div>;
 }
 
 function SectionTitle(props: { children: JSX.Element }) {
@@ -318,20 +318,38 @@ function DefinitionSettings() {
           options={[
             {
               value: "normal",
-              label: "Обычный (3 страницы)",
+              label: "Обычный",
               description:
-                "Показывает выбранный текст, основное определение и словарную статью на отдельных страницах.",
+                "Показывает выбранный текст, основное определение и словарную статью отдельными карточками.",
             },
             {
               value: "single-page",
               label: "Одна страница",
-              description: "Объединяет все определения в одну прокручиваемую страницу.",
+              description: "Объединяет выбранный текст и основное определение в одну карточку.",
             },
             {
               value: "glossary-split",
               label: "По словарям",
               description:
-                "Разделяет словарную статью на отдельные страницы для каждого словаря. Работает только с форматом Yomitan.",
+                "Разделяет словарную статью на отдельные карточки для каждого словаря. Работает только с форматом Yomitan.",
+            },
+          ]}
+        />
+        <SelectSetting
+          configKey="extraDefinitionsVisibility"
+          label="Дополнительные определения"
+          options={[
+            {
+              value: "always",
+              label: "Всегда показывать",
+              description:
+                "Ru/Eng, Glossary и MiscInfo видны сразу вместе с основным определением.",
+            },
+            {
+              value: "on-key",
+              label: "По клавише Z",
+              description:
+                "Сначала только SelectionText и MainDefinition. Остальное — по нажатию Z.",
             },
           ]}
         />
@@ -339,6 +357,11 @@ function DefinitionSettings() {
           configKey="definitionPictureFromGlossary"
           label="Собирать изображения из словаря"
           tooltip="Показывать изображения из словарной статьи в разделе иллюстраций определения."
+        />
+        <ToggleSetting
+          configKey="sentenceFuriganaAlwaysVisible"
+          label="Фуригана в предложении всегда видна"
+          tooltip="На обратной стороне фуригана в предложении показывается без наведения."
         />
       </div>
     </Section>
@@ -768,7 +791,7 @@ function DebugSettings() {
         <SectionTitle>Диагностика</SectionTitle>
       </div>
       <div class="collapse-content p-0">
-        <div class="flex flex-col gap-4 animate-fade-in ">
+        <div class="flex flex-col gap-4">
           <div class="grid grid-cols-[repeat(auto-fit,minmax(10rem,1fr))] rounded-box gap-x-4 gap-y-2">
             <TextSetting configKey="ankiConnectAddress" label="Адрес AnkiConnect" />
             <ToggleSetting configKey="showStartupTime" label="Показывать время запуска" />
@@ -884,7 +907,7 @@ function $KikuFiles() {
                 <span>
                   Некоторые файлы отсутствуют; часть функций может работать неправильно.
                   <br />
-                  <span class="text-xs ">{missing}</span>
+                  <span class="text-xs">{missing}</span>
                 </span>
               </div>
             </Show>
