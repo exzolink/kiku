@@ -1,11 +1,12 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, mkdtemp, readFile, rm, writeFile, copyFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile, copyFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { basename, join } from "node:path";
+import { basename, join, relative, sep } from "node:path";
 import { promisify } from "node:util";
 import { DatabaseSync } from "node:sqlite";
-import extractZip from "extract-zip";
+import { zipSync } from "fflate";
+import { defaultAnkiFields } from "#/src/lib/default-anki-fields";
 import { defaultConfig } from "#/src/lib/default-config";
 import { noteIdentity } from "#/src/lib/note-identity";
 import { emptyNotesManifest } from "#/src/lib/notes-manifest";
@@ -44,11 +45,27 @@ const downloadableMedia = {
   },
 } as const;
 
+type ModelField = {
+  name: string;
+  ord: number;
+  font?: string;
+  size?: number;
+  sticky?: boolean;
+  rtl?: boolean;
+  description?: string;
+  plainText?: boolean;
+  collapsed?: boolean;
+  excludeFromSearch?: boolean;
+  preventDeletion?: boolean;
+  id?: number;
+  tag?: number | null;
+};
+
 type Model = {
   name: string;
   css: string;
   tmpls: { name: string; qfmt: string; afmt: string }[];
-  flds: { name: string; ord: number }[];
+  flds: ModelField[];
 };
 
 type Deck = {
@@ -120,6 +137,73 @@ function setField(values: string[], fieldIndex: Map<string, number>, field: stri
   values[index] = value;
 }
 
+function reindexFields(model: Model) {
+  model.flds.forEach((field, index) => {
+    field.ord = index;
+  });
+}
+
+function insertModelField(model: Model, fieldName: string, after: string) {
+  if (model.flds.some((field) => field.name === fieldName)) return -1;
+  const afterIndex = model.flds.findIndex((field) => field.name === after);
+  const index = afterIndex >= 0 ? afterIndex + 1 : model.flds.length;
+  const defaults = defaultAnkiFields[fieldName] ?? { font: "Tahoma", size: 18, collapsed: false };
+  model.flds.splice(index, 0, {
+    name: fieldName,
+    ord: index,
+    font: defaults.font,
+    size: defaults.size,
+    sticky: false,
+    rtl: false,
+    description: "",
+    plainText: false,
+    collapsed: defaults.collapsed,
+    excludeFromSearch: false,
+    preventDeletion: false,
+    tag: null,
+  });
+  reindexFields(model);
+  return index;
+}
+
+function applyDefaultFieldSettings(model: Model) {
+  for (const field of model.flds) {
+    const defaults = defaultAnkiFields[field.name];
+    if (!defaults) continue;
+    field.font = defaults.font;
+    field.size = defaults.size;
+    field.collapsed = defaults.collapsed;
+  }
+}
+
+function ensureNoteFieldCount(
+  database: DatabaseSync,
+  modelId: string,
+  fieldCount: number,
+  insertedAt: number[],
+) {
+  if (insertedAt.length === 0) return;
+  const rows = database
+    .prepare("SELECT id, flds FROM notes WHERE mid = ?")
+    .all(Number(modelId)) as { id: number; flds: string }[];
+  const update = database.prepare("UPDATE notes SET flds = ?, mod = ? WHERE id = ?");
+  const now = Math.floor(Date.now() / 1000);
+
+  for (const row of rows) {
+    const fields = row.flds.split("\x1f");
+    for (const index of insertedAt) {
+      fields.splice(index, 0, "");
+    }
+    while (fields.length < fieldCount) fields.push("");
+    if (fields.length !== fieldCount) {
+      throw new Error(
+        `Неверное число полей у заметки ${row.id}: ${fields.length}, ожидалось ${fieldCount}`,
+      );
+    }
+    update.run(fields.join("\x1f"), now, row.id);
+  }
+}
+
 function localizeSampleNotes(database: DatabaseSync, modelId: string, model: Model) {
   const fieldIndex = new Map(model.flds.map((field) => [field.name, field.ord]));
   const rows = database
@@ -130,6 +214,7 @@ function localizeSampleNotes(database: DatabaseSync, modelId: string, model: Mod
 
   for (const row of rows) {
     const fields = row.flds.split("\x1f");
+    while (fields.length < model.flds.length) fields.push("");
     const expression = fields[fieldIndex.get("Expression") ?? -1];
     const translations: Record<string, { definition: string; sentence: string }> = {
       恐れる: {
@@ -154,6 +239,8 @@ function localizeSampleNotes(database: DatabaseSync, modelId: string, model: Mod
       `<ol><li data-dictionary="Яркси">${translation.definition}</li></ol>`,
     );
     setField(fields, fieldIndex, "SelectionText", "");
+    setField(fields, fieldIndex, "RuDefinition", "");
+    setField(fields, fieldIndex, "EngDefinition", "");
     setField(fields, fieldIndex, "Glossary", "");
     setField(fields, fieldIndex, "SentenceTranslation", translation.sentence);
     setField(fields, fieldIndex, "Frequency", "");
@@ -192,6 +279,15 @@ async function updateCollection(collectionPath: string) {
     template.qfmt = applyDefaultDataAttributes(front);
     template.afmt = applyDefaultDataAttributes(back);
     deckEntry[1].name = noteIdentity.deck;
+
+    const insertedAt = [
+      insertModelField(model, "RuDefinition", "MainDefinition"),
+      insertModelField(model, "EngDefinition", "RuDefinition"),
+    ].filter((index) => index >= 0);
+    // Insert higher indices first so earlier splice positions stay valid when padding notes.
+    insertedAt.sort((a, b) => b - a);
+    ensureNoteFieldCount(database, modelId, model.flds.length, insertedAt);
+    applyDefaultFieldSettings(model);
 
     localizeSampleNotes(database, modelId, model);
     database
@@ -243,6 +339,50 @@ async function downloadBasePackage(destination: string) {
   await writeFile(destination, Buffer.from(await response.arrayBuffer()));
 }
 
+async function extractArchive(archive: string, destination: string) {
+  // extract-zip can stall under vite-node on Windows; tar is available there.
+  if (process.platform === "win32") {
+    await execFileAsync("tar", ["-xf", archive, "-C", destination]);
+    return;
+  }
+
+  const extractZip = (await import("extract-zip")).default;
+  await extractZip(archive, { dir: destination });
+}
+
+async function collectZipEntries(
+  directory: string,
+  root: string,
+  entries: Record<string, Uint8Array>,
+) {
+  for (const dirent of await readdir(directory, { withFileTypes: true })) {
+    const absolute = join(directory, dirent.name);
+    if (dirent.isDirectory()) {
+      await collectZipEntries(absolute, root, entries);
+      continue;
+    }
+    const zipPath = relative(root, absolute).split(sep).join("/");
+    entries[zipPath] = await readFile(absolute);
+  }
+}
+
+async function createZipFromDirectory(sourceDirectory: string, destination: string) {
+  const entries: Record<string, Uint8Array> = {};
+  await collectZipEntries(sourceDirectory, sourceDirectory, entries);
+  await writeFile(destination, zipSync(entries, { level: 9 }));
+}
+
+async function verifyZip(archive: string) {
+  try {
+    await execFileAsync("unzip", ["-t", archive]);
+    return;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+
+  await execFileAsync("tar", ["-tf", archive]);
+}
+
 async function run() {
   const version = await getVersion();
   const workDir = await mkdtemp(join(tmpdir(), "kiku-ru-apkg-"));
@@ -256,16 +396,19 @@ async function run() {
     await ensureDownloadableMedia();
     await prepareGeneratedMedia();
     await downloadBasePackage(sourcePackage);
-    await extractZip(sourcePackage, { dir: unpacked });
+    await extractArchive(sourcePackage, unpacked);
     await replaceMediaFiles(unpacked);
     await updateCollection(join(unpacked, "collection.anki21"));
     await rm(output, { force: true });
-    await execFileAsync("zip", ["-q", "-X", "-r", output, "."], { cwd: unpacked });
-    await execFileAsync("unzip", ["-t", output]);
+    await createZipFromDirectory(unpacked, output);
+    await verifyZip(output);
     console.log(`Готов пакет ${basename(output)}: ${output}`);
   } finally {
     await rm(workDir, { recursive: true, force: true });
   }
 }
 
-await run();
+run().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

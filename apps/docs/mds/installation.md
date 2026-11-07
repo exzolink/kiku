@@ -33,6 +33,8 @@ Kiku RU совместим с [Lapis](https://github.com/donkuri/lapis), поэ�
 | RelatedExpression     |                                                                                                                     |
 | SelectionText         | `{popup-selection-text}`                                                                                            |
 | MainDefinition        | Например, `{single-glossary-jmdict/jitendex}`. Нажмите стрелку рядом с полем и выберите словарь с похожим форматом. |
+| RuDefinition          | Русский словарь, например `{single-glossary-…}`. Показывается слева от основного определения.                       |
+| EngDefinition         | Английский словарь, например `{single-glossary-…}`. Показывается справа от основного определения.                   |
 | DefinitionPicture     | Здесь можно добавить изображение, которое поясняет значение слова.                                                  |
 | Sentence              | `{cloze-prefix}<b>{cloze-body}</b>{cloze-suffix}`                                                                   |
 | SentenceFurigana      | `{sentence-furigana-plain}`                                                                                         |
@@ -41,10 +43,6 @@ Kiku RU совместим с [Lapis](https://github.com/donkuri/lapis), поэ�
 | Picture               |                                                                                                                     |
 | Glossary              | `{glossary}`                                                                                                        |
 | Hint                  |                                                                                                                     |
-| IsWordAndSentenceCard |                                                                                                                     |
-| IsClickCard           |                                                                                                                     |
-| IsSentenceCard        |                                                                                                                     |
-| IsAudioCard           |                                                                                                                     |
 | PitchPosition         | `{pitch-accent-positions}`                                                                                          |
 | PitchCategories       | `{pitch-accent-categories}`                                                                                         |
 | Frequency             | `{frequencies}`                                                                                                     |

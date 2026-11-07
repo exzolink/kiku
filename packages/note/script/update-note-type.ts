@@ -1,8 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
+import { noteIdentity } from "#/src/lib/note-identity";
 import { paths } from "#/tools/paths.ts";
 import { AnkiConnect, log } from "#/tools/util.js";
-import { noteIdentity } from "#/src/lib/note-identity";
 import { applyDefaultDataAttributes, applyDefaultStyleVariables } from "./model-template.ts";
 
 class Script {
@@ -53,7 +53,32 @@ class Script {
     console.log(`✅ Updated "${this.NOTE_TYPE}" style from ${basename(this.STYLE_PATH)}`);
   }
 
+  async ensureFields() {
+    const fieldsResult = await AnkiConnect.call("modelFieldNames", {
+      modelName: this.NOTE_TYPE,
+    });
+    const existing = fieldsResult.result as string[];
+    const required = [
+      { name: "RuDefinition", after: "MainDefinition" },
+      { name: "EngDefinition", after: "RuDefinition" },
+    ];
+
+    for (const field of required) {
+      if (existing.includes(field.name)) continue;
+      const afterIndex = existing.indexOf(field.after);
+      const index = afterIndex >= 0 ? afterIndex + 1 : existing.length;
+      await AnkiConnect.call("modelFieldAdd", {
+        modelName: this.NOTE_TYPE,
+        fieldName: field.name,
+        index,
+      });
+      existing.splice(index, 0, field.name);
+      console.log(`✅ Added field "${field.name}" to "${this.NOTE_TYPE}"`);
+    }
+  }
+
   async run() {
+    await this.ensureFields();
     const { front, back, style } = await this.readTemplates();
     const frontTemplate = applyDefaultDataAttributes(front);
     const backTemplate = applyDefaultDataAttributes(back);

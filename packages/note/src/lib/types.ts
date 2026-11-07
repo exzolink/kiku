@@ -9,6 +9,8 @@ export type AnkiFields = {
   RelatedExpression: string;
   SelectionText: string;
   MainDefinition: string;
+  RuDefinition: string;
+  EngDefinition: string;
   DefinitionPicture: string;
   Sentence: string;
   SentenceFurigana: string;
@@ -17,10 +19,6 @@ export type AnkiFields = {
   Picture: string;
   Glossary: string;
   Hint: string;
-  IsWordAndSentenceCard: string;
-  IsClickCard: string;
-  IsSentenceCard: string;
-  IsAudioCard: string;
   PitchPosition: string;
   PitchCategories: string;
   Frequency: string;
@@ -115,6 +113,8 @@ export const ankiFieldsSkeleton: AnkiFields = {
   RelatedExpression: "",
   SelectionText: "",
   MainDefinition: "",
+  RuDefinition: "",
+  EngDefinition: "",
   DefinitionPicture: "",
   Sentence: "",
   SentenceFurigana: "",
@@ -123,10 +123,6 @@ export const ankiFieldsSkeleton: AnkiFields = {
   Picture: "",
   Glossary: "",
   Hint: "",
-  IsWordAndSentenceCard: "",
-  IsClickCard: "",
-  IsSentenceCard: "",
-  IsAudioCard: "",
   PitchPosition: "",
   PitchCategories: "",
   Frequency: "",
