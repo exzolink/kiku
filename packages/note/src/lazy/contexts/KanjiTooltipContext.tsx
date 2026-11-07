@@ -200,7 +200,7 @@ function KanjiTooltip() {
             <XIcon class="size-5 cursor-pointer text-base-content-soft" />
           </button>
           <div
-            class="relative text-base bg-base-200/97 z-10 p-2 sm:p-4 border border-base-300 rounded-lg font-cyrillic w-xs sm:w-md lg:w-lg shadow-lg max-h-[75vh] overflow-auto"
+            class="relative text-base bg-base-200 z-10 p-2 sm:p-4 border border-base-300 rounded-lg font-cyrillic w-xs sm:w-md lg:w-lg shadow-lg max-h-[75vh] overflow-auto"
             lang="ru"
             style={{ color: "initial" }}
           >
@@ -208,7 +208,7 @@ function KanjiTooltip() {
               <KanjiContextProvider kanji={$kanjiTooltip.kanji}>
                 <Suspense
                   fallback={
-                    <div class="animate-pulse text-base-content-soft text-sm">Загрузка…</div>
+                    <div class="text-base-content-soft text-sm">Загрузка…</div>
                   }
                 >
                   <$KanjiInfo />

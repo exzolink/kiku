@@ -1,52 +1,28 @@
-import { useBreakpointContext } from "#/src/contexts/BreakpointContext";
 import { useCardContext } from "#/src/contexts/CardContext";
 import { useConfigContext } from "#/src/contexts/ConfigContext";
 import { useGeneralContext } from "#/src/contexts/GeneralContext";
 import { daisyUIThemes, type DaisyUITheme } from "#/src/lib/theme";
 
 export function useViewTransition() {
-  function startViewTransition(callback: () => void, opts: { beforeCallback?: () => void } = {}) {
-    if (document.startViewTransition) {
-      opts.beforeCallback?.();
-      return document.startViewTransition(callback);
-    } else {
-      callback();
-    }
+  function startViewTransition(callback: () => void, _opts: { beforeCallback?: () => void } = {}) {
+    callback();
   }
   return startViewTransition;
 }
 
 export function useNavigationTransition() {
   const { $card, $setCard } = useCardContext();
-  const bp = useBreakpointContext();
-  const startViewTransition = useViewTransition();
 
   function navigate(
     destination: "main" | "settings" | "nested" | "kanji" | (() => void),
-    direction: "back" | "forward",
+    _direction: "back" | "forward",
     navigateBack?: () => void,
   ) {
     if (navigateBack) $setCard("navigateBack", (old) => [...old, navigateBack]);
-    const start = () => {
-      if (typeof destination === "function") {
-        destination();
-      } else {
-        $setCard("page", destination);
-      }
-    };
-
-    if (!bp.isAtLeast("sm")) {
-      startViewTransition(start, {
-        beforeCallback() {
-          document.documentElement.dataset.transitionDirection = direction;
-        },
-      })
-        ?.finished.then(() => {
-          document.documentElement.removeAttribute("data-transition-direction");
-        })
-        .catch(() => {});
+    if (typeof destination === "function") {
+      destination();
     } else {
-      start();
+      $setCard("page", destination);
     }
   }
   function navigateBack() {
@@ -59,26 +35,12 @@ export function useNavigationTransition() {
 }
 
 export function useThemeTransition() {
-  const { isAnkiDesktop, initialDarkMode } = useGeneralContext();
+  const { initialDarkMode } = useGeneralContext();
   const { $config, $setConfig } = useConfigContext();
-  const startViewTransition = useViewTransition();
-  const { $$card } = useCardContext();
 
   function $changeTheme(theme: DaisyUITheme, mode: "light" | "dark") {
     const key = mode === "dark" ? "themeDark" : "theme";
-    if ($$card.loading || isAnkiDesktop) {
-      $setConfig(key, theme);
-    } else {
-      startViewTransition(() => $setConfig(key, theme), {
-        beforeCallback() {
-          document.documentElement.dataset.themeTransition = "true";
-        },
-      })
-        ?.finished.then(() => {
-          document.documentElement.removeAttribute("data-theme-transition");
-        })
-        .catch(() => {});
-    }
+    $setConfig(key, theme);
   }
 
   function $changeThemeNext() {
@@ -93,10 +55,9 @@ export function useThemeTransition() {
 
 export function usePictureModalTransition() {
   const { $setCard } = useCardContext();
-  const startViewTransition = useViewTransition();
 
   function $setPictureModal(img: string | undefined) {
-    startViewTransition(() => $setCard("pictureModal", img));
+    $setCard("pictureModal", img);
   }
 
   return { $setPictureModal };

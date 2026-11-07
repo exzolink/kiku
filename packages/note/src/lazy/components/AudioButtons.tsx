@@ -78,7 +78,7 @@ export function AudioButtons(props: { position: 1 | 2 }) {
       <Match when={props.position === 2}>
         <Portal mount={$general.layoutRef}>
           <div
-            class="bottom-4 left-4 flex sm:hidden flex-col gap-2 items-center animate-fade-in-sm"
+            class="bottom-4 left-4 flex sm:hidden flex-col gap-2 items-center"
             classList={{
               fixed: !isAnkiWeb,
               absolute: isAnkiWeb,

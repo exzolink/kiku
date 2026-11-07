@@ -78,7 +78,7 @@ export function MergeContextModal() {
     <>
       <Switch>
         <Match when={$$notesResource.loading || $$ankiConnect.loading}>
-          <span class="loading loading-dots loading-xs text-base-content-faint animate-fade-in-sm"></span>
+          <span class="loading loading-dots loading-xs text-base-content-faint"></span>
         </Match>
         <Match when={$$notesResource.state === "ready"}>
           <button
@@ -88,13 +88,11 @@ export function MergeContextModal() {
             }}
             on:touchend={(e) => e.stopPropagation()}
           >
-            <GitPullRequestArrow class="size-4 cursor-pointer text-base-content-soft animate-fade-in-sm" />
+            <GitPullRequestArrow class="size-4 cursor-pointer text-base-content-soft" />
           </button>
         </Match>
         <Match when={$$notesResource.state === "errored"}>
-          <span class="animate-fade-in-sm">
-            <span class="status status-error animate-ping"></span>
-          </span>
+          <span class="status status-error"></span>
         </Match>
         <Match
           when={
@@ -103,7 +101,7 @@ export function MergeContextModal() {
             $$ankiConnect.state === "errored"
           }
         >
-          <div class="indicator animate-fade-in-sm">
+          <div class="indicator">
             <div class="flex items-center">
               <button
                 on:click={async () => {
@@ -119,7 +117,7 @@ export function MergeContextModal() {
                 <RefreshCwIcon class="size-4 cursor-pointer text-base-content-soft" />
               </button>
             </div>
-            <span class="status status-error animate-ping"></span>
+            <span class="status status-error"></span>
           </div>
         </Match>
       </Switch>
@@ -298,7 +296,7 @@ function $Dialog(props: {
                 on:touchend={(e) => e.stopPropagation()}
               >
                 <ArrowLeftIcon
-                  class="self-center text-base-content-calm size-10 cursor-pointer transition-transform"
+                  class="self-center text-base-content-calm size-10 cursor-pointer"
                   classList={{
                     "rotate-0": $mergeDirection() === "toRoot",
                     "rotate-180": $mergeDirection() === "toCurrent",

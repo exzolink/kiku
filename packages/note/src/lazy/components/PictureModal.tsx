@@ -39,7 +39,7 @@ export function PictureModal() {
     <Portal mount={$general.layoutRef}>
       <div
         part="picture-modal"
-        class="z-40 top-0 left-0 w-full h-full p-4 sm:p-8 bg-black/75 flex flex-col transition-opacity overflow-auto tappable"
+        class="z-40 top-0 left-0 w-full h-full p-4 sm:p-8 bg-black/75 flex flex-col overflow-auto tappable"
         classList={{
           fixed: !isAnkiWeb,
           absolute: isAnkiWeb,
@@ -69,7 +69,7 @@ export function PictureModal() {
           <Switch>
             <Match when={!$showAll()}>
               <div
-                class="transition-all [&_img]:max-h-[85vh] sm:[&_img]:max-h-[95vh] [&_*:not(img)]:contents"
+                class="[&_img]:max-h-[85vh] sm:[&_img]:max-h-[95vh] [&_*:not(img)]:contents"
                 innerHTML={$card.pictureModal ?? ""}
               ></div>
             </Match>
@@ -78,7 +78,7 @@ export function PictureModal() {
                 <For each={$allPictures()}>
                   {(pic) => (
                     <div
-                      class="aspect-square relative rounded-lg overflow-hidden flex items-center justify-center cursor-pointer sm:hover:scale-105 transition-transform group tappable"
+                      class="aspect-square relative rounded-lg overflow-hidden flex items-center justify-center cursor-pointer group tappable"
                       on:click={(e) => {
                         e.stopPropagation();
                         $setCard("pictureModal", pic.html);

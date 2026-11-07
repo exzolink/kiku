@@ -38,11 +38,7 @@ function $RelatedExpression() {
     useAnkiFieldContext();
   const [$ref, $setRef] = createSignal<HTMLDivElement>();
 
-  const $displayExpression = createMemo(() => {
-    if ($initialSide() === "back") return initialAnkiFields.Expression;
-    if (initialAnkiFields.IsSentenceCard || initialAnkiFields.IsAudioCard) return "?";
-    return initialAnkiFields.Expression;
-  });
+  const $displayExpression = createMemo(() => initialAnkiFields.Expression);
 
   const $relatedExpression = createMemo(() => {
     const query = $$card();
@@ -154,6 +150,9 @@ function $RelatedExpression() {
   );
 
   const [$hasMultipleRows, $setHasMultipleRows] = createSignal(false);
+  const $hasContent = createMemo(
+    () => $relatedExpression().length > 0 || ($isNewNote() && $initialSide() === "back"),
+  );
 
   onMount(() => {
     const ref = $ref();
@@ -172,8 +171,11 @@ function $RelatedExpression() {
   });
 
   return (
-    <div ref={$setRef} class="flex gap-x-2 sm:gap-x-4 flex-wrap relative">
-      <Show when={$relatedExpression().length || ($isNewNote() && $initialSide() === "back")}>
+    <Show when={$hasContent()}>
+      <div
+        ref={$setRef}
+        class="flex gap-x-2 sm:gap-x-4 flex-wrap relative text-lg sm:text-xl mb-0.5 sm:mb-2"
+      >
         <div class="flex gap-px items-center">
           <MoveDown
             class="size-4 sm:size-5 text-base-content-faint"
@@ -182,14 +184,13 @@ function $RelatedExpression() {
             }}
           ></MoveDown>
           <button
-            class="hover:text-base-content transition-colors cursor-pointer animate-fade-in-sm indicator font-japanese-display"
+            class="hover:text-base-content cursor-pointer indicator font-japanese-display"
             classList={{
               "text-base-content-soft": !$isInitialAnkiFields(),
               "text-base-content": $isInitialAnkiFields(),
             }}
             lang="ja"
             on:click={() => {
-              $setCard("fadeInTopSection", false);
               resetAnkiFields();
               $setCard("side", $initialSide());
             }}
@@ -201,55 +202,54 @@ function $RelatedExpression() {
             </Show>
           </button>
         </div>
-      </Show>
-      <For each={$relatedExpression()}>
-        {(note) => {
-          const cardId = note.cards[0]?.toString() ?? "";
-          const isNew = $newNotes().has(Number(cardId));
-          return (
-            <button
-              class="hover:text-base-content transition-colors cursor-pointer animate-fade-in-sm indicator"
-              classList={{
-                "text-base-content-soft underline underline-offset-4 sm:underline-offset-5 decoration-1":
-                  $ankiFields.CardID !== cardId && isExplicitRelatedExpression(note),
-                "text-base-content-soft":
-                  $ankiFields.CardID !== cardId && !isExplicitRelatedExpression(note),
-                "text-base-content underline underline-offset-4 sm:underline-offset-5 decoration-1":
-                  $ankiFields.CardID === cardId && isExplicitRelatedExpression(note),
-                "text-base-content":
-                  $ankiFields.CardID === cardId && !isExplicitRelatedExpression(note),
-                "font-japanese-text": $initialSide() === "front",
-                "font-japanese-display": $initialSide() !== "front",
-              }}
-              lang="ja"
-              on:click={() => {
-                $setCard("fadeInTopSection", false);
-                $setAnkiFields({
-                  ...ankiFieldsSkeleton,
-                  ...Object.fromEntries(
-                    Object.entries(note.fields).map(([key, value]) => {
-                      return [key, value.value];
-                    }),
-                  ),
-                  CardID: cardId,
-                  Tags: note.tags.join(" "),
-                  __IS_ROOT__: false,
-                });
-                $setCard("side", "back");
-              }}
-              on:touchend={(e) => e.stopPropagation()}
-            >
-              {$initialSide() === "front"
-                ? note.fields.ExpressionReading.value
-                : note.fields.Expression.value}
-              <Show when={isNew}>
-                <span class="status status-info"></span>
-              </Show>
-            </button>
-          );
-        }}
-      </For>
-    </div>
+        <For each={$relatedExpression()}>
+          {(note) => {
+            const cardId = note.cards[0]?.toString() ?? "";
+            const isNew = $newNotes().has(Number(cardId));
+            return (
+              <button
+                class="hover:text-base-content cursor-pointer indicator"
+                classList={{
+                  "text-base-content-soft underline underline-offset-4 sm:underline-offset-5 decoration-1":
+                    $ankiFields.CardID !== cardId && isExplicitRelatedExpression(note),
+                  "text-base-content-soft":
+                    $ankiFields.CardID !== cardId && !isExplicitRelatedExpression(note),
+                  "text-base-content underline underline-offset-4 sm:underline-offset-5 decoration-1":
+                    $ankiFields.CardID === cardId && isExplicitRelatedExpression(note),
+                  "text-base-content":
+                    $ankiFields.CardID === cardId && !isExplicitRelatedExpression(note),
+                  "font-japanese-text": $initialSide() === "front",
+                  "font-japanese-display": $initialSide() !== "front",
+                }}
+                lang="ja"
+                on:click={() => {
+                  $setAnkiFields({
+                    ...ankiFieldsSkeleton,
+                    ...Object.fromEntries(
+                      Object.entries(note.fields).map(([key, value]) => {
+                        return [key, value.value];
+                      }),
+                    ),
+                    CardID: cardId,
+                    Tags: note.tags.join(" "),
+                    __IS_ROOT__: false,
+                  });
+                  $setCard("side", "back");
+                }}
+                on:touchend={(e) => e.stopPropagation()}
+              >
+                {$initialSide() === "front"
+                  ? note.fields.ExpressionReading.value
+                  : note.fields.Expression.value}
+                <Show when={isNew}>
+                  <span class="status status-info"></span>
+                </Show>
+              </button>
+            );
+          }}
+        </For>
+      </div>
+    </Show>
   );
 }
 

@@ -34,7 +34,6 @@ export type CardStore = {
   nestedAnkiFields: AnkiFields;
   nestedNoteId: number | undefined;
   nestedIsMergePreview: boolean;
-  fadeInTopSection: boolean;
 };
 
 type CardContextValue = {
@@ -78,7 +77,6 @@ export function CardStoreContextProvider(props: {
     nestedAnkiFields: ankiFieldsSkeleton,
     nestedNoteId: undefined,
     nestedIsMergePreview: false,
-    fadeInTopSection: false,
   });
 
   const $initialSide = createMemo(() => props.initialSide);

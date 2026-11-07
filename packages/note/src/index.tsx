@@ -304,7 +304,9 @@ export class KikuHostAnki extends KikuHost {
     const { logger } = this;
     let config: KikuConfig | null = null;
     try {
-      const cache = sessionStorage.getItem(constants.key["kiku-config"]);
+      const cache = !import.meta.env.DEV
+        ? sessionStorage.getItem(constants.key["kiku-config"])
+        : null;
       if (cache) {
         config = validateConfig(JSON.parse(cache), logger);
         logger.info("[init] config loaded from sessionStorage");

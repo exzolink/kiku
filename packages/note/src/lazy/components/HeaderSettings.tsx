@@ -38,7 +38,7 @@ export function HeaderSettings() {
                 >
                   <RefreshCwIcon class="size-4 cursor-pointer text-base-content-soft" />
                 </button>
-                <span class="status status-error animate-ping"></span>
+                <span class="status status-error"></span>
               </div>
 
               <Show when={$$ankiConnect.error}>

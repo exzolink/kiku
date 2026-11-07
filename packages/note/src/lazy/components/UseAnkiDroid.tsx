@@ -177,7 +177,7 @@ function Icon(props: {
 
   return (
     <div
-      class="fixed top-1/2 -translate-y-1/2 flex justify-center items-center rounded-full transition-transform z-10"
+      class="fixed top-1/2 -translate-y-1/2 flex justify-center items-center rounded-full z-10"
       classList={{
         "bg-error/30": props.color === "error",
         "bg-success/30": props.color === "success",
@@ -194,7 +194,7 @@ function Icon(props: {
       <Switch>
         <Match when={props.color === "error"}>
           <XIcon
-            class="size-12 rounded-full p-2 shadow-lg transition-colors"
+            class="size-12 rounded-full p-2 shadow-lg"
             classList={{
               "bg-base-100 text-base-content-primary": props.progress !== 1,
               "bg-error text-error-content": props.progress === 1,
@@ -203,7 +203,7 @@ function Icon(props: {
         </Match>
         <Match when={props.color === "success"}>
           <CheckIcon
-            class="size-12 rounded-full p-2 shadow-lg transition-colors"
+            class="size-12 rounded-full p-2 shadow-lg"
             classList={{
               "bg-base-100 text-base-content-primary": props.progress !== 1,
               "bg-success text-success-content": props.progress === 1,

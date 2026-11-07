@@ -21,7 +21,7 @@ export function $KanjiInfo() {
   const { $$kanjiInfo: $$info } = useKanjiContext();
 
   return (
-    <div class="flex flex-col text-xs sm:text-sm text-base-content-calm items-start z-10 relative animate-fade-in">
+    <div class="flex flex-col text-xs sm:text-sm text-base-content-calm items-start z-10 relative">
       <div
         classList={{
           hidden: !$$info()?.keyword,
@@ -117,7 +117,7 @@ export function $KanjiInfoExtra(props: { inKanjiPage?: boolean }) {
   function $VisuallySimilar() {
     return (
       <Show when={$$info()?.visuallySimilar.length}>
-        <div class="collapse collapse-arrow rounded-none animate-fade-in">
+        <div class="collapse collapse-arrow rounded-none">
           <input
             type="checkbox"
             class="p-0"
@@ -162,7 +162,7 @@ export function $KanjiInfoExtra(props: { inKanjiPage?: boolean }) {
   function $ComposedOf() {
     return (
       <Show when={$$info()?.composedOf.length}>
-        <div class="collapse collapse-arrow rounded-none animate-fade-in">
+        <div class="collapse collapse-arrow rounded-none">
           <input
             type="checkbox"
             class="p-0"
@@ -207,7 +207,7 @@ export function $KanjiInfoExtra(props: { inKanjiPage?: boolean }) {
   function $UsedIn() {
     return (
       <Show when={$$info()?.usedIn.length}>
-        <div class="collapse collapse-arrow rounded-none animate-fade-in">
+        <div class="collapse collapse-arrow rounded-none">
           <input
             type="checkbox"
             class="p-0"
@@ -252,7 +252,7 @@ export function $KanjiInfoExtra(props: { inKanjiPage?: boolean }) {
   function $Meanings() {
     return (
       <Show when={$$info()?.meanings.length}>
-        <div class="collapse collapse-arrow rounded-none animate-fade-in">
+        <div class="collapse collapse-arrow rounded-none">
           <input
             type="checkbox"
             class="p-0"
@@ -284,7 +284,7 @@ export function $KanjiInfoExtra(props: { inKanjiPage?: boolean }) {
   function $Related() {
     return (
       <Show when={$$info()?.related.length}>
-        <div class="collapse collapse-arrow rounded-none animate-fade-in">
+        <div class="collapse collapse-arrow rounded-none">
           <input
             type="checkbox"
             class="p-0"
@@ -396,7 +396,7 @@ function $KanjiKeyword(props: KanjiKeywordProps) {
 
   return (
     <button
-      class="inline-flex border border-base-300 transition-colors hover:border-base-content-subtle-200"
+      class="inline-flex border border-base-300 hover:border-base-content-subtle-200"
       classList={{
         "cursor-pointer": $ready(),
         "cursor-not-allowed": !$ready(),
@@ -406,7 +406,7 @@ function $KanjiKeyword(props: KanjiKeywordProps) {
       on:click={props.onClick}
       on:touchend={(e) => e.stopPropagation()}
     >
-      <span class="px-1 text-lg sm:text-xl font-japanese-display" lang="ja">
+      <span class="px-1 text-base sm:text-lg font-japanese-display" lang="ja">
         {$kanjiState.kanji}
       </span>
       <Show when={$$keyword()}>

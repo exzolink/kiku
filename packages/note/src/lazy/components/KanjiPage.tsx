@@ -131,7 +131,7 @@ function Page() {
             <Show when={!contextLabel}>
               <div
                 role="tablist"
-                class="tabs tabs-box animate-fade-in p-0 shadow-none font-japanese-text"
+                class="tabs tabs-box p-0 shadow-none font-japanese-text"
                 lang="ja"
               >
                 <TabItem
@@ -186,8 +186,8 @@ function Page() {
               }}
             />
           </div>
-          <div class="flex flex-col items-center gap-2 animate-fade-in">
-            <div class="font-japanese-display text-5xl sm:text-6xl" lang="ja">
+          <div class="flex flex-col items-center gap-2">
+            <div class="font-japanese-display text-4xl sm:text-5xl" lang="ja">
               <Switch>
                 <Match when={contextLabel}>{contextLabel?.text}</Match>
                 <Match when={$isRuby()}>
@@ -236,11 +236,11 @@ function Page() {
               </Switch>
             </div>
             <Show when={$title()}>
-              <div class="text-base-content-calm text-base sm:text-lg">{$title()}</div>
+              <div class="text-base-content-calm text-base">{$title()}</div>
             </Show>
           </div>
 
-          <div class="flex flex-col gap-2 sm:gap-4 ">
+          <div class="flex flex-col gap-2 sm:gap-4">
             <Switch>
               <Match when={$kanjiPage.tab === "kanji"}>
                 <Index each={$filteredNoteList()}>
@@ -349,7 +349,7 @@ function KanjiCollapsible(props: { data: AnkiNote[] }) {
   );
 
   return (
-    <div class="collapse bg-base-200 border border-base-300 animate-fade-in">
+    <div class="collapse bg-base-200 border border-base-300">
       <input
         type="checkbox"
         checked={$checked()}
@@ -367,9 +367,9 @@ function KanjiCollapsible(props: { data: AnkiNote[] }) {
         <KanjiText />
         <div class="flex gap-1 sm:gap-2 absolute top-2 right-2 sm:top-4 sm:right-4">
           <Show when={$loading()}>
-            <div class="loading loading-dots loading-xs text-base-content-faint animate-fade-in-sm"></div>
+            <div class="loading loading-dots loading-xs text-base-content-faint"></div>
           </Show>
-          <div class="text-base-content-soft bg-base-300 px-1 rounded-xs animate-fade-in-sm text-sm sm:text-base">
+          <div class="text-base-content-soft bg-base-300 px-1 rounded-xs text-sm sm:text-base">
             {$data().length}
           </div>
         </div>
@@ -378,7 +378,7 @@ function KanjiCollapsible(props: { data: AnkiNote[] }) {
       <div class="collapse-content text-sm px-2 sm:px-4 pb-2 sm:pb-4 flex flex-col gap-1 sm:gap-2">
         <Suspense
           fallback={
-            <div class="flex flex-col gap-2 sm:gap-4 animate-pulse py-1">
+            <div class="flex flex-col gap-2 sm:gap-4 py-1">
               <div class="h-20 sm:h-24 bg-base-300 rounded w-full" />
               <div class="h-20 sm:h-24 bg-base-300 rounded w-full" />
               <div class="h-20 sm:h-24 bg-base-300 rounded w-full" />
@@ -388,7 +388,7 @@ function KanjiCollapsible(props: { data: AnkiNote[] }) {
           <ErrorBoundary fallback={null}>
             <$KanjiInfoExtra inKanjiPage />
           </ErrorBoundary>
-          <ul class="list bg-base-100 rounded-box shadow-md animate-fade-in">
+          <ul class="list bg-base-100 rounded-box shadow-md">
             <For each={$data()}>
               {(data) => {
                 return <AnkiNoteItem data={data} highlightedKanji={$kanjiState.kanji} />;
@@ -403,7 +403,7 @@ function KanjiCollapsible(props: { data: AnkiNote[] }) {
 
 function NoteList(props: { list?: AnkiNote[]; items?: { note: AnkiNote; sources: Source[] }[] }) {
   return (
-    <ul class="list bg-base-100 rounded-box shadow-md animate-fade-in">
+    <ul class="list bg-base-100 rounded-box shadow-md">
       <For each={props.items ?? props.list ?? []}>
         {(item) => {
           if ("note" in item) {
@@ -522,7 +522,7 @@ function AnkiNoteItem(props: { data: AnkiNote; highlightedKanji?: string; source
       <div class="flex flex-col gap-2 flex-1">
         <div class="tracking-wide flex gap-2 items-start justify-between">
           <div class="flex gap-2 items-end">
-            <div class="font-japanese-display text-2xl sm:text-4xl" lang="ja">
+            <div class="font-japanese-display text-xl sm:text-3xl" lang="ja">
               <Switch>
                 <Match when={$isRuby() || $furiganaData().length === 0}>
                   <ExpressionNoFurigana />
@@ -601,14 +601,14 @@ function KanjiText() {
 
   return (
     <div class="flex gap-2 sm:gap-4 me-2 w-full">
-      <div class="font-japanese-display text-5xl sm:text-6xl mb-1" lang="ja" ref={$setRef}>
+      <div class="font-japanese-display text-4xl sm:text-5xl mb-1" lang="ja" ref={$setRef}>
         {$kanjiState.kanji}
       </div>
 
       <ErrorBoundary fallback={null}>
         <Suspense
           fallback={
-            <div class="flex flex-col gap-1 animate-pulse flex-1">
+            <div class="flex flex-col gap-1 flex-1">
               <div class="h-3 sm:h-4 bg-base-300 rounded w-1/2" />
               <div class="h-3 sm:h-4 bg-base-300 rounded w-3/4" />
               <div class="h-3 sm:h-4 bg-base-300 rounded w-4/5" />

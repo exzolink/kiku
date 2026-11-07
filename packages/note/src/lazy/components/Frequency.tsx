@@ -7,7 +7,7 @@ export function Frequency() {
   const $freqSort = createMemo(() => $ankiFields.FreqSort);
   const $frequency = createMemo(() => $ankiFields.Frequency);
   return (
-    <div class="flex gap-1 items-center animate-fade-in-sm relative hover:[&_#frequency]:block z-20">
+    <div class="flex gap-1 items-center relative hover:[&_#frequency]:block z-20">
       <div
         class="text-base-content-soft text-sm sm:text-base"
         innerHTML={$freqSort()}

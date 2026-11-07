@@ -8,7 +8,7 @@ export function Tag() {
   return (
     <>
       <Show when={$tags().length}>
-        <div class="flex gap-2 items-center justify-center animate-fade-in flex-wrap">
+        <div class="flex gap-2 items-center justify-center flex-wrap">
           <For each={$tags()}>
             {(tag) => {
               const isWarning = ["leech", "potential-leech", "marked"].includes(tag);
