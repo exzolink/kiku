@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { createReadStream, createWriteStream } from "node:fs";
 import { readFile, rm } from "node:fs/promises";
 import { createGzip } from "node:zlib";
@@ -85,4 +86,14 @@ export async function getVersion() {
   const version = pkg.version;
   if (typeof version !== "string") throw Error("version is not a string");
   return version;
+}
+
+export function getCommitSha() {
+  const fromEnv = process.env.COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA;
+  if (fromEnv) return fromEnv;
+  try {
+    return execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+  } catch {
+    return "dev";
+  }
 }

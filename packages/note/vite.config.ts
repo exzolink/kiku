@@ -4,7 +4,7 @@ import circularDpendency from "vite-plugin-circular-dependency";
 import dts from "vite-plugin-dts";
 import solid from "vite-plugin-solid";
 import { paths } from "./tools/paths.js";
-import { getVersion } from "./tools/util.js";
+import { getCommitSha, getVersion } from "./tools/util.js";
 import { serveAnkiCollectionMedia } from "./tools/vite-plugin-serve-anki-collection.media.js";
 
 const fastBuild = process.env.FAST_BUILD === "true";
@@ -24,7 +24,7 @@ export default defineConfig({
   },
   define: {
     __VERSION__: JSON.stringify(await getVersion()),
-    __COMMIT_SHA__: JSON.stringify(process.env.COMMIT_SHA ?? "dev"),
+    __COMMIT_SHA__: JSON.stringify(getCommitSha()),
   },
   build: {
     lib: {
