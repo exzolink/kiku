@@ -68,12 +68,10 @@ describe("bundled font CSS contract", () => {
       readFile(join(__dirname, "../components/ExpressionSection.tsx"), "utf-8"),
     ]);
 
-    expect(layout).toContain('class="font-cyrillic transition-colors relative"');
+    expect(layout).toContain('class="font-cyrillic relative"');
     expect(layout).toContain('lang="ru"');
     expect(sentence).toContain('class="sentence font-japanese-text sentence-field"');
-    expect(sentence).toContain(
-      'class="collapse-content text-base sm:text-lg text-base-content-calm p-0 font-cyrillic"',
-    );
+    expect(sentence).toContain('class="text-base text-base-content-calm font-cyrillic"');
     expect(expression).toContain("expression font-japanese-display");
     expect(sentence.match(/lang="ja"/g)).toHaveLength(1);
     expect(sentence.match(/lang="ru"/g)).toHaveLength(1);

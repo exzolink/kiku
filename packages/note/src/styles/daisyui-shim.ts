@@ -2,7 +2,15 @@ import type { PluginAPI } from "tailwindcss/plugin";
 import daisyui from "daisyui";
 // https://github.com/tailwindlabs/tailwindcss-intellisense/issues/1596
 /* oxlint-disable  */
-import { daisyUIThemes, type DaisyUITheme } from "../../src/lib/theme";
+import {
+  colorBase100Map,
+  darkThemeBase200,
+  darkThemeBase300,
+  darkThemeSecondary,
+  darkThemeSecondaryContent,
+  daisyUIThemes,
+  type DaisyUITheme,
+} from "../../src/lib/theme";
 type CssInJs = Parameters<PluginAPI["addBase"]>[0];
 
 const themeSelectorPattern = /\[data-theme=([^\]\s,]+)\]/g;
@@ -95,6 +103,20 @@ function addColorBaseContentPrimary(addBase: PluginAPI["addBase"]) {
   });
 }
 
+function addDarkThemeOverrides(addBase: PluginAPI["addBase"]) {
+  // Keep these after daisyUI theme rules so they win the cascade in _kiku.css.
+  // style.css alone is not enough: Anki loads _kiku.css after the note-type CSS.
+  addBase({
+    [createThemeSelector("dark").join(", ")]: {
+      "--color-base-100": colorBase100Map.dark,
+      "--color-base-200": darkThemeBase200,
+      "--color-base-300": darkThemeBase300,
+      "--color-secondary": darkThemeSecondary,
+      "--color-secondary-content": darkThemeSecondaryContent,
+    },
+  });
+}
+
 function daisyuiShim(options: Record<string, unknown> = {}) {
   const { handler, config } = daisyui(options);
   return {
@@ -105,6 +127,7 @@ function daisyuiShim(options: Record<string, unknown> = {}) {
       };
       handler({ ...api, addBase: shimmedAddBase });
       addColorBaseContentPrimary(api.addBase);
+      addDarkThemeOverrides(api.addBase);
     },
     config,
   };

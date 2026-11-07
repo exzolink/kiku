@@ -38,9 +38,21 @@ export const daisyUIThemes = [
 
 export type DaisyUITheme = (typeof daisyUIThemes)[number];
 
+/** Card/panel surface for the customized "dark" theme (business base-200 = #1c1c1c). */
+export const darkThemeBase200 = "oklch(22.648% 0 0)";
+
+/** Tertiary surface for the customized "dark" theme (#202020). */
+export const darkThemeBase300 = "oklch(24.353% 0 0)";
+
+/** Pastel secondary (was oklch(65% 0.241 354.308)). */
+export const darkThemeSecondary = "oklch(78% 0.1 354.308)";
+
+/** Text on pastel secondary. */
+export const darkThemeSecondaryContent = "oklch(35% 0.07 354.308)";
+
 export const colorBase100Map: Record<DaisyUITheme, string> = {
   light: "oklch(100% 0 0)",
-  dark: "oklch(25.33% .016 252.42)",
+  dark: "oklch(20.46% 0 0)",
   cupcake: "oklch(97.788% .004 56.375)",
   bumblebee: "oklch(100% 0 0)",
   emerald: "oklch(100% 0 0)",
