@@ -1,5 +1,8 @@
 # Kiku RU
 
+> [!IMPORTANT]
+> Личная сборка под себя: другая раскладка определений (Ru/Eng по бокам), настройки фуриганы и доп. словарей, правки карточки и упаковки `.apkg`.
+
 [Документация](https://ganqqwerty.github.io/kiku/) · [Последний выпуск](https://github.com/ganqqwerty/kiku/releases/latest) · [Исходный проект Kiku](https://github.com/youyoumu/kiku)
 
 Русская версия типа заметки [Kiku](https://github.com/youyoumu/kiku) для изучения японского
