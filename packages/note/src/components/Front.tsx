@@ -3,12 +3,14 @@ import { isServer } from "solid-js/web";
 import { useCardContext } from "#/src/contexts/CardContext";
 import type { DatasetProp } from "#/src/lib/config";
 import { useLoadPlugin } from "#/src/hooks/plugin";
+import { DefinitionPictureRow } from "./DefinitionPictureRow";
 import { FieldGroupPaginationSection } from "./FieldGroupPaginationSection";
 import { PictureSection } from "./PictureSection";
 import { useAnkiFieldContext } from "#/src/contexts/AnkiFieldsContext";
 import { useConfigContext } from "#/src/contexts/ConfigContext";
 import { useGeneralContext } from "#/src/contexts/GeneralContext";
 import { ExpressionSection } from "./ExpressionSection";
+import { HeaderLayout } from "./HeaderLayout";
 
 // oxfmt-ignore
 const Lazy = {
@@ -22,31 +24,17 @@ const Lazy = {
   Expression: lazy(async () => ({ default: (await import("#/src/lazy")).Expression })),
   Settings: lazy(async () => ({ default: (await import("#/src/lazy")).Settings })),
   CardEnd: lazy(async () => ({ default: (await import("#/src/lazy")).CardEnd })),
+  PictureModal: lazy(async () => ({ default: (await import("#/src/lazy")).PictureModal })),
 };
 
 export function Front() {
   const { $card, $setCard, $isInitialSide, nested } = useCardContext();
-  const { $ankiFields, $isInitialAnkiFields } = useAnkiFieldContext();
-  const [$clicked, $setClicked] = createSignal(false);
+  const { $ankiFields } = useAnkiFieldContext();
   const [$hideExpression, $setHideExpression] = createSignal(false);
   const { $config } = useConfigContext();
   const { logger } = useGeneralContext();
   const loadPlugin = useLoadPlugin();
-  const $hidden = createMemo(() => {
-    if (isServer) return true;
-    if (!$isInitialSide()) return false;
-    if (
-      $ankiFields.IsSentenceCard ||
-      $ankiFields.IsWordAndSentenceCard ||
-      $ankiFields.IsAudioCard
-    ) {
-      return false;
-    }
-    if ($ankiFields.IsClickCard && $clicked()) {
-      return false;
-    }
-    return true;
-  });
+  const $hidden = createMemo(() => isServer);
 
   onMount(() => {
     setTimeout(() => {
@@ -74,24 +62,13 @@ export function Front() {
           <Lazy.Settings />
         </Match>
         <Match when={$card.page === "main"}>
-          {$card.ready && <Lazy.HeaderMain />}
+          <HeaderLayout>{$card.ready && <Lazy.HeaderMain />}</HeaderLayout>
           <div class="flex flex-col">
-            <div class="flex justify-between gap-2 items-start mb-0.5 sm:mb-2">
-              <div
-                class="text-xl sm:text-2xl min-h-lh hover:h-auto overflow-hidden transition-[height] [interpolate-size:allow-keywords] w-full"
-                classList={{
-                  "h-lh": $isInitialAnkiFields(),
-                  "h-auto": !$isInitialAnkiFields(),
-                }}
-              >
-                {$card.ready && <Lazy.RelatedExpression />}
-              </div>
-            </div>
+            {$card.ready && <Lazy.RelatedExpression />}
             <div
               class="expression-picture-box tappable"
               on:click={() => {
                 if (!$isInitialSide()) return;
-                $setClicked((prev) => !prev);
                 $setHideExpression(false);
               }}
               on:touchend={(e) => e.stopPropagation()}
@@ -99,9 +76,9 @@ export function Front() {
               <div class="expression-audio-box">
                 <ExpressionSection hideExpression={$hideExpression()} />
                 <Show when={!$isInitialSide()}>
-                  <div class="hidden sm:block sm:h-8 sm:mt-2">
+                  <div class="hidden sm:block sm:h-7 sm:mt-1">
                     {$card.ready && (
-                      <div class="animate-fade-in-sm flex gap-2">
+                      <div class="flex gap-2">
                         <Lazy.AudioButtons position={1} />
                       </div>
                     )}
@@ -115,16 +92,12 @@ export function Front() {
           <div
             class="flex flex-col gap-4 items-center text-center justify-center"
             classList={{
-              "transition-opacity duration-1000 opacity-0": $hideExpression() && $isInitialSide(),
+              "opacity-0": $hideExpression() && $isInitialSide(),
             }}
           >
             {$card.ready && !$hidden() && <Lazy.Sentence />}
+            {$card.ready && !$hidden() && <DefinitionPictureRow />}
           </div>
-          {$card.ready && $ankiFields.IsAudioCard && $isInitialSide() && (
-            <div class="flex gap-2 justify-center animate-fade-in-sm">
-              <Lazy.AudioButtons position={1} />
-            </div>
-          )}
           {$isInitialSide() && (
             <div
               class={`gap-2 items-center justify-center text-center border-t hint text-base-content-calm hint-field border-base-200 p-2`}
@@ -143,6 +116,7 @@ export function Front() {
           {$card.ready && <Lazy.CardEnd />}
         </Match>
       </Switch>
+      {$card.ready && <Lazy.PictureModal />}
       {$card.ready && <Lazy.AudioElements />}
     </>
   );

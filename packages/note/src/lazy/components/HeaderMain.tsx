@@ -4,10 +4,10 @@ import { getRussianThemeName } from "#/src/lib/ru";
 import { useCardContext } from "#/src/contexts/CardContext";
 import { useConfigContext } from "#/src/contexts/ConfigContext";
 import { useGeneralContext } from "#/src/contexts/GeneralContext";
-import { HeaderLayout } from "./HeaderLayout";
+import { useRelatedNotes } from "#/src/hooks/notes";
+import { ExternalLinks } from "./ExternalLinks";
 import { ArrowLeftIcon, BoltIcon, PaintbrushIcon } from "./Icons";
 import { MergeContextModal } from "./MergeContextModal";
-import { useRelatedNotes } from "#/src/hooks/notes";
 
 export function HeaderMain(props: { onExitNested?: () => void }) {
   const { $initialSide, $$card, nested, isMergePreview } = useCardContext();
@@ -18,8 +18,8 @@ export function HeaderMain(props: { onExitNested?: () => void }) {
   const { $changeThemeNext } = useThemeTransition();
 
   return (
-    <HeaderLayout>
-      <div class="flex gap-1 sm:gap-2 items-center animate-fade-in-sm">
+    <>
+      <div class="flex gap-1 sm:gap-2 items-center">
         <Switch>
           <Match when={nested}>
             <button on:click={props.onExitNested} on:touchend={(e) => e.stopPropagation()}>
@@ -46,6 +46,11 @@ export function HeaderMain(props: { onExitNested?: () => void }) {
                 <div class="status status-warning absolute top-0 right-0 translate-x-0.5 -translate-y-0.5"></div>
               </Show>
             </div>
+            <Show when={$initialSide() === "back"}>
+              <div class="flex items-center gap-1.5 sm:gap-2 ms-1">
+                <ExternalLinks />
+              </div>
+            </Show>
             <Show when={$config.showTheme}>
               <button
                 class="flex gap-1 sm:gap-2 items-center cursor-pointer"
@@ -72,24 +77,24 @@ export function HeaderMain(props: { onExitNested?: () => void }) {
           <Switch>
             <Match when={$$card.state === "pending" || $$card.state === "unresolved"}>
               <span
-                class="loading loading-dots loading-xs text-base-content-faint animate-fade-in-sm"
+                class="loading loading-dots loading-xs text-base-content-faint"
                 classList={{
                   "me-4": $initialSide() === "front" && isAnkiDroidNewStudyScreen,
                 }}
               ></span>
             </Match>
             <Match when={$$card.state === "errored"}>
-              <div class="status status-error animate-ping"></div>
+              <div class="status status-error"></div>
             </Match>
             <Match when={$$card.state === "ready" && $initialSide() === "back"}>
-              <div class="text-base-content-soft cursor-pointer animate-fade-in-sm">
+              <div class="text-base-content-soft cursor-pointer">
                 <KanjiPageIndicator />
               </div>
             </Match>
           </Switch>
         </Show>
       </div>
-    </HeaderLayout>
+    </>
   );
 }
 
@@ -146,7 +151,7 @@ function $KanjiPageIndicator() {
     return ($$card()?.noteList ?? []).map(([kanji, data]) => {
       return (
         <button
-          class="flex gap-px sm:gap-0.5 items-start hover:text-base-content transition-colors cursor-pointer"
+          class="flex gap-px sm:gap-0.5 items-start hover:text-base-content cursor-pointer"
           on:click={() => {
             onClick({ initialTab: "kanji", kanji });
           }}
@@ -172,7 +177,7 @@ function $KanjiPageIndicator() {
   function $SameReadingIndicator() {
     return (
       <button
-        class="flex gap-px sm:gap-0.5 items-start hover:text-base-content transition-colors cursor-pointer"
+        class="flex gap-px sm:gap-0.5 items-start hover:text-base-content cursor-pointer"
         on:click={() => {
           onClick({ initialTab: "reading" });
         }}
@@ -197,7 +202,7 @@ function $KanjiPageIndicator() {
   function $SameExpressionIndicator() {
     return (
       <button
-        class="flex gap-px sm:gap-0.5 items-start hover:text-base-content transition-colors cursor-pointer"
+        class="flex gap-px sm:gap-0.5 items-start hover:text-base-content cursor-pointer"
         on:click={() => {
           onClick({ initialTab: "same" });
         }}
@@ -222,7 +227,7 @@ function $KanjiPageIndicator() {
   function $RelatedExpressionIndicator() {
     return (
       <button
-        class="flex gap-px sm:gap-0.5 items-start hover:text-base-content transition-colors cursor-pointer"
+        class="flex gap-px sm:gap-0.5 items-start hover:text-base-content cursor-pointer"
         on:click={() => {
           onClick({ initialTab: "related" });
         }}

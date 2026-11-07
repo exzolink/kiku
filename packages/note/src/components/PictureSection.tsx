@@ -107,7 +107,7 @@ export function PictureSection() {
         <div class="absolute inset-y-0 left-0 right-0 flex justify-between pointer-events-none">
           <button
             type="button"
-            class="h-full w-4 sm:w-6 cursor-pointer opacity-0 hover:opacity-100 hover:bg-base-content/30 hover:backdrop-blur-sm pointer-events-auto transition-all flex items-center justify-center"
+            class="h-full w-4 sm:w-6 cursor-pointer opacity-0 hover:opacity-100 hover:bg-base-content/30 hover:backdrop-blur-sm pointer-events-auto flex items-center justify-center"
             on:click={prev}
             on:touchend={(e) => e.stopPropagation()}
           >
@@ -115,7 +115,7 @@ export function PictureSection() {
           </button>
           <button
             type="button"
-            class="h-full w-4 sm:w-6 cursor-pointer opacity-0 hover:opacity-100 hover:bg-base-content/30 hover:backdrop-blur-sm pointer-events-auto transition-all flex items-center justify-center"
+            class="h-full w-4 sm:w-6 cursor-pointer opacity-0 hover:opacity-100 hover:bg-base-content/30 hover:backdrop-blur-sm pointer-events-auto flex items-center justify-center"
             on:click={next}
             on:touchend={(e) => e.stopPropagation()}
           >

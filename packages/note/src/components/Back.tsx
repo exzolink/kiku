@@ -1,4 +1,4 @@
-import { createEffect, createMemo, lazy, Match, on, onMount, Switch } from "solid-js";
+import { createMemo, lazy, Match, onMount, Switch } from "solid-js";
 import { isServer } from "solid-js/web";
 import { CardStoreContextProvider, useCardContext } from "#/src/contexts/CardContext";
 import type { DatasetProp } from "#/src/lib/config";
@@ -13,6 +13,7 @@ import { FieldGroupContextProvider } from "#/src/contexts/FieldGroupContext";
 import { useGeneralContext } from "#/src/contexts/GeneralContext";
 import { usePitch } from "#/src/hooks/pitch";
 import { ExpressionSection } from "./ExpressionSection";
+import { HeaderLayout } from "./HeaderLayout";
 
 // oxfmt-ignore
 const Lazy = {
@@ -30,13 +31,12 @@ const Lazy = {
   Expression: lazy(async () => ({ default: (await import("#/src/lazy")).Expression })),
   AnkiMobileDebug: lazy(async () => ({ default: (await import("#/src/lazy")).AnkiMobileDebug })),
   RelatedExpression: lazy(async () => ({ default: (await import("#/src/lazy")).RelatedExpression, })),
-  Frequency: lazy(async () => ({ default: (await import("#/src/lazy")).Frequency })),
 };
 
 export function Back(props: { onExitNested?: () => void }) {
   const { navigateBack } = useNavigationTransition();
   const { $card, $setCard, nested } = useCardContext();
-  const { $ankiFields, $isInitialAnkiFields } = useAnkiFieldContext();
+  const { $ankiFields } = useAnkiFieldContext();
   const loadPlugin = useLoadPlugin();
   const { logger } = useGeneralContext();
   usePitch();
@@ -48,14 +48,6 @@ export function Back(props: { onExitNested?: () => void }) {
       loadPlugin();
     }, 0);
   });
-
-  createEffect(
-    on(
-      () => $card.page,
-      () => $setCard("fadeInTopSection", true),
-      { defer: true },
-    ),
-  );
 
   const $pitchFieldDataset = createMemo<DatasetProp>(() => ({
     "data-has-pitch": isServer
@@ -97,37 +89,23 @@ export function Back(props: { onExitNested?: () => void }) {
           </AnkiFieldContextProvider>
         </Match>
         <Match when={$card.page === "main"}>
-          {$card.ready && <Lazy.HeaderMain onExitNested={props.onExitNested} />}
+          <HeaderLayout>
+            {$card.ready && <Lazy.HeaderMain onExitNested={props.onExitNested} />}
+          </HeaderLayout>
           <div class="flex flex-col">
-            <div class="flex justify-between gap-2 items-start mb-0.5 sm:mb-2">
-              <div
-                class="text-xl sm:text-2xl min-h-lh hover:h-auto overflow-hidden transition-[height] [interpolate-size:allow-keywords] w-full"
-                classList={{
-                  "h-lh": $isInitialAnkiFields(),
-                  "h-auto": !$isInitialAnkiFields(),
-                }}
-              >
-                {$card.ready && <Lazy.RelatedExpression />}
-              </div>
-              <div class="mt-1 min-w-20 flex justify-end">{$card.ready && <Lazy.Frequency />}</div>
-            </div>
-            <div
-              class="expression-picture-box"
-              classList={{
-                "animate-fade-in": $card.fadeInTopSection,
-              }}
-            >
+            {$card.ready && <Lazy.RelatedExpression />}
+            <div class="expression-picture-box">
               <div class="expression-audio-box">
                 <ExpressionSection />
                 <div
-                  class="mt-2 sm:mt-4 gap-4 pitch pitch-field min-h-lh"
+                  class="mt-1 sm:mt-2 gap-2 pitch pitch-field min-h-lh"
                   {...$pitchFieldDataset()}
                 >
                   {$ankiFields.PitchPosition && $card.ready && <Lazy.Pitches />}
                 </div>
-                <div class="hidden sm:block sm:h-8 sm:mt-2">
+                <div class="hidden sm:block sm:h-7 sm:mt-1">
                   {$card.ready && (
-                    <div class="animate-fade-in-sm flex gap-2">
+                    <div class="flex gap-2">
                       <Lazy.AudioButtons position={1} />
                     </div>
                   )}

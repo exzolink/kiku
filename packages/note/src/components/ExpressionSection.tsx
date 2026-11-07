@@ -21,9 +21,6 @@ export function ExpressionSection(props: { hideExpression?: boolean }) {
     if ($isRootAnkiFields() && $ankiFields.ExpressionFurigana && $initialSide() === "back") {
       return $ankiFields["furigana:ExpressionFurigana"];
     }
-    if ($initialSide() === "front" && ($ankiFields.IsSentenceCard || $ankiFields.IsAudioCard)) {
-      return "?";
-    }
     return $ankiFields.Expression;
   });
 
@@ -43,13 +40,10 @@ export function ExpressionSection(props: { hideExpression?: boolean }) {
 
   return (
     <div
-      class="expression font-japanese-display text-center vertical-rl transition-colors text-pitch"
+      class="expression font-japanese-display text-center vertical-rl text-pitch"
       lang="ja"
       classList={{
-        "border-b-2 border-dotted border-base-content-soft":
-          $initialSide() === "front" && !!$ankiFields.IsClickCard && $isInitialSide(),
-        "transition-opacity duration-1000 opacity-0":
-          $initialSide() === "front" && $hideExpression() && $isInitialSide(),
+        "opacity-0": $initialSide() === "front" && $hideExpression() && $isInitialSide(),
         "hide-rt": $initialSide() === "front" && $isInitialSide(),
       }}
       {...$pitchFieldDataset()}
@@ -60,7 +54,7 @@ export function ExpressionSection(props: { hideExpression?: boolean }) {
             class="contents"
             innerHTML={
               $initialSide() === "front"
-                ? `{{#IsSentenceCard}} <span class="horizontal-tb">?</span> {{/IsSentenceCard}} {{#IsAudioCard}} <span class="horizontal-tb">?</span> {{/IsAudioCard}} {{^IsSentenceCard}} {{^IsAudioCard}} {{Expression}} {{/IsAudioCard}} {{/IsSentenceCard}}`
+                ? "{{Expression}}"
                 : "{{#ExpressionFurigana}}{{furigana:ExpressionFurigana}}{{/ExpressionFurigana}}{{^ExpressionFurigana}}{{Expression}}{{/ExpressionFurigana}}"
             }
           ></div>
@@ -71,16 +65,6 @@ export function ExpressionSection(props: { hideExpression?: boolean }) {
             classList={{ invisible: nested }}
             innerHTML={$expressionInnerHtml()}
           ></div>
-        </Match>
-        <Match
-          when={
-            $card.ready &&
-            $initialSide() === "front" &&
-            $isInitialSide() &&
-            ($ankiFields.IsSentenceCard || $ankiFields.IsAudioCard)
-          }
-        >
-          <span class="horizontal-tb">?</span>
         </Match>
         <Match when={$card.ready}>
           <Suspense fallback={<div class="contents" innerHTML={$expressionInnerHtml()}></div>}>

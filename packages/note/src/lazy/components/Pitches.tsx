@@ -2,19 +2,34 @@ import { createMemo, ErrorBoundary, For, Show } from "solid-js";
 import type { DatasetProp } from "#/src/lib/config";
 import type { PitchInfo } from "#/src/lib/hatsuon";
 import type { PitchType } from "#/src/lib/types";
+import { useAnkiFieldContext } from "#/src/contexts/AnkiFieldsContext";
 import { useCtxContext } from "#/src/contexts/CtxContext";
 import { useGeneralContext } from "#/src/contexts/GeneralContext";
 import { usePitch } from "#/src/hooks/pitch";
 
 export function Pitches() {
   const { $pitchInfos } = usePitch();
+  const { $ankiFields } = useAnkiFieldContext();
 
   return (
-    <For each={$pitchInfos()}>
-      {(pitchInfo, index) => {
-        return <Pitch pitchInfo={pitchInfo} index={index()} />;
-      }}
-    </For>
+    <Show
+      when={$pitchInfos().length > 0}
+      fallback={
+        <Show when={$ankiFields.PitchPosition}>
+          <div
+            class="pitch-diagram font-japanese-text text-pitch [&_svg]:block [&_svg]:max-h-10 sm:[&_svg]:max-h-12"
+            lang="ja"
+            innerHTML={$ankiFields.PitchPosition}
+          />
+        </Show>
+      }
+    >
+      <For each={$pitchInfos()}>
+        {(pitchInfo, index) => {
+          return <Pitch pitchInfo={pitchInfo} index={index()} />;
+        }}
+      </For>
+    </Show>
   );
 }
 
@@ -73,7 +88,7 @@ export function DefaultPitch(props: {
       ref={props.ref}
       {...$pitchDataset()}
     >
-      <div class="flex items-start gap-1 animate-fade-in-sm">
+      <div class="flex items-start gap-1">
         <div>
           <For each={props.pitchInfo.morae}>
             {(mora, i) => {
