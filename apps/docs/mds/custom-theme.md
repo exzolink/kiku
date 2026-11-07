@@ -64,9 +64,9 @@ outline: deep
   .nightMode #kiku-host[data-theme-dark="dark"]::part(root),
   [data-theme-preview="dark"] {
     color-scheme: dark;
-    --color-base-100: oklch(25.33% 0.016 252.42);
-    --color-base-200: oklch(23.26% 0.014 253.1);
-    --color-base-300: oklch(21.15% 0.012 254.09);
+    --color-base-100: oklch(20.46% 0 0);
+    --color-base-200: oklch(22.648% 0 0);
+    --color-base-300: oklch(24.353% 0 0);
     --color-base-content: oklch(97.807% 0.029 256.847);
     --color-primary: oklch(58% 0.233 277.117);
     --color-primary-content: oklch(96% 0.018 272.314);

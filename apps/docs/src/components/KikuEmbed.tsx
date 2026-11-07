@@ -1,18 +1,8 @@
 import { computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { VPButton } from "vitepress/theme";
 
-const cardFieldNames = [
-  "IsWordAndSentenceCard",
-  "IsClickCard",
-  "IsSentenceCard",
-  "IsAudioCard",
-] as const;
-
-type CardFieldName = (typeof cardFieldNames)[number];
-
 export default defineComponent({
   setup() {
-    const selectedField = ref<CardFieldName | "">("");
     const side = ref<"front" | "back">("front");
     const darkMode = ref(
       import.meta.env.SSR ? true : document.documentElement.classList.contains("dark"),
@@ -35,7 +25,6 @@ export default defineComponent({
         el.removeAttribute("data-dark-mode");
       }
       el.setAttribute("side", side.value);
-      el.setAttribute("selected-field", selectedField.value);
     }
 
     onMounted(() => {
@@ -50,11 +39,7 @@ export default defineComponent({
       onBeforeUnmount(() => observer.disconnect());
     });
 
-    watch([darkMode, side, selectedField], updateHostAttrs);
-
-    watch(selectedField, () => {
-      side.value = "front";
-    });
+    watch([darkMode, side], updateHostAttrs);
 
     return () => (
       <div style={{ display: "grid", gap: "0.75rem" }}>
@@ -72,43 +57,6 @@ export default defineComponent({
               {toggleLabel.value}
             </VPButton>
           }
-          <label
-            style={{
-              display: "inline-flex",
-              gap: "0.4rem",
-              alignItems: "center",
-              cursor: "pointer",
-            }}
-          >
-            <input
-              type="radio"
-              value=""
-              checked={selectedField.value === ""}
-              onChange={() => (selectedField.value = "")}
-              style={{ margin: 0 }}
-            />
-            <span>Обычная карточка</span>
-          </label>
-          {cardFieldNames.map((fieldName) => (
-            <label
-              key={fieldName}
-              style={{
-                display: "inline-flex",
-                gap: "0.4rem",
-                alignItems: "center",
-                cursor: "pointer",
-              }}
-            >
-              <input
-                type="radio"
-                value={fieldName}
-                checked={selectedField.value === fieldName}
-                onChange={() => (selectedField.value = fieldName)}
-                style={{ margin: 0 }}
-              />
-              <span>{fieldName}</span>
-            </label>
-          ))}
         </div>
 
         <kiku-host-docs

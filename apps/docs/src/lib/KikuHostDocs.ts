@@ -8,13 +8,6 @@ import {
 } from "@repo/note";
 import kikuWorkerUrl from "@repo/note/_kiku_worker.js?url";
 
-const cardFieldNames = [
-  "IsWordAndSentenceCard",
-  "IsClickCard",
-  "IsSentenceCard",
-  "IsAudioCard",
-] as const;
-
 //oxfmt-ignore
 const exampleFields = {
   "Expression": "貢献",
@@ -24,6 +17,8 @@ const exampleFields = {
   "RelatedExpression": "",
   "SelectionText": "<ol><li data-details=\"JMdict\"><span class=\"dict-group__tag-list\"><span class=\"dict-group__tag dict-group__tag--name\"><span class=\"dict-group__tag-inner\">1</span></span><span class=\"dict-group__tag dict-group__tag--name\"><span class=\"dict-group__tag-inner\">n</span></span><span class=\"dict-group__tag dict-group__tag--name\"><span class=\"dict-group__tag-inner\">vi</span></span><span class=\"dict-group__tag dict-group__tag--name\"><span class=\"dict-group__tag-inner\">vs</span></span><span class=\"dict-group__tag dict-group__tag--dict\"><span class=\"dict-group__tag-inner\">JMdict</span></span></span><span class=\"dict-group__glossary\"><span><ul data-sc-content=\"glossary\" lang=\"en\" style=\"list-style-type: circle;\"><li>contribution (furthering a goal or cause)</li><li>services (to a cause)</li></ul><ul data-sc-content=\"examples\" lang=\"ja\" style=\"list-style-type: square;\"><li>彼は国への貢献を認められてナイト爵位を与えられた。</li><li lang=\"en\" style=\"font-size: 60%; list-style-type: none;\">He was awarded a knighthood in acknowledgement of his services to the nation.</li></ul></span></span></li><li data-details=\"JMdict\"><span class=\"dict-group__tag-list\"><span class=\"dict-group__tag dict-group__tag--name\"><span class=\"dict-group__tag-inner\">2</span></span><span class=\"dict-group__tag dict-group__tag--name\"><span class=\"dict-group__tag-inner\">n</span></span><span class=\"dict-group__tag dict-group__tag--name\"><span class=\"dict-group__tag-inner\">vs</span></span><span class=\"dict-group__tag dict-group__tag--name\"><span class=\"dict-group__tag-inner\">hist</span></span><span class=\"dict-group__tag dict-group__tag--dict\"><span class=\"dict-group__tag-inner\">JMdict</span></span></span><span class=\"dict-group__glossary\">paying tribute | tribute</span></li></ol>",
   "MainDefinition": "",
+  "RuDefinition": "",
+  "EngDefinition": "",
   "DefinitionPicture": "",
   "Sentence": "<span data-group-id=\"11\">これで 少しは<br>世の中に<b>貢献</b>できるかな</span><span data-group-id=\"10\">どうせ勇者の捕縛に<b>貢献</b>すれば➡</span>このお店に<b>貢献</b>するために―",
   "SentenceFurigana": "",
@@ -32,10 +27,6 @@ const exampleFields = {
   "Picture": "<img data-group-id=\"11\" src=\"Anime_Time_Solo_Leveli_928960_pzThqpQf.jpeg\"><img data-group-id=\"10\" src=\"SubsPlease%20Tate%20no%20Yuusha%20no%20Nariagari%20S3%20-%2010%20(1080p)%20BCA53DD5.mkv_1190221.jpeg\"><div><img src=\"cbt%20gochuumon%20wa%20usagi%20desuka%20s01e09%20bdrip%201920x1080%20x264%20flac%209092049a.mkv_957803.webp\"></div>",
   "Glossary": "",
   "Hint": "",
-  "IsWordAndSentenceCard": "",
-  "IsClickCard": "",
-  "IsSentenceCard": "",
-  "IsAudioCard": "",
   "PitchPosition": "<div class=\"pa-positions__group\" data-details=\"アクセント辞典\"><div class=\"pa-positions__dictionary\"><div class=\"pa-positions__dictionary-inner\">アクセント辞典</div></div><ol><li><span style=\"display:inline;\"><span>[</span><span>0</span><span>]</span></span></li></ol></div>",
   "PitchCategories": "",
   "Frequency": "",
@@ -73,7 +64,7 @@ export class KikuHostDocs extends KikuHost {
   }
 
   static get observedAttributes() {
-    return ["side", "selected-field", "data-dark-mode"];
+    return ["side", "data-dark-mode"];
   }
 
   attributeChangedCallback(name: string, _old: string | null, value: string | null) {
@@ -109,7 +100,6 @@ export class KikuHostDocs extends KikuHost {
     this.#dispose?.();
     this.now = performance.now();
     const isDark = document.documentElement.classList.contains("dark");
-    const selectedField = this.getAttribute("selected-field") ?? "";
     const assetsPath = new URL(import.meta.env.BASE_URL, window.location.origin).href.replace(
       /\/$/,
       "",
@@ -125,13 +115,7 @@ export class KikuHostDocs extends KikuHost {
         '<span data-group-id="10">В любом случае, если мы поможем поймать героя…</span>' +
         "Чтобы помочь этому магазину…",
       Picture: "",
-      ...Object.fromEntries(
-        cardFieldNames.map((name) => [name, selectedField === name ? "x" : ""]),
-      ),
-      ExpressionAudio:
-        selectedField === "IsAudioCard" && this.side === "front"
-          ? ""
-          : exampleFields.ExpressionAudio,
+      ExpressionAudio: this.side === "front" ? "" : exampleFields.ExpressionAudio,
     };
 
     const res = super.render({
