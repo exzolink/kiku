@@ -27,18 +27,22 @@ export function FieldGroupContextProvider(props: { children: JSX.Element }) {
   const { $initialSide } = useCardContext();
   const { logger } = useGeneralContext();
 
-  const $sentenceField = createMemo(() => {
-    if (!$isRootAnkiFields()) return $ankiFields.Sentence;
-    if ($initialSide() === "front") return $ankiFields["kanji:Sentence"];
+  const $sentenceFuriganaHtml = createMemo(() => $ankiFields.SentenceFurigana?.trim() ?? "");
 
-    if ($ankiFields["furigana:SentenceFurigana"]) {
-      return applyBoldFormatting(
-        $ankiFields["kanji:Sentence"],
-        $ankiFields["furigana:SentenceFurigana"],
-      );
+  const $sentenceField = createMemo(() => {
+    if (!$isRootAnkiFields()) {
+      if ($sentenceFuriganaHtml() && $initialSide() === "back") {
+        return applyBoldFormatting($ankiFields.Sentence, $sentenceFuriganaHtml());
+      }
+      return $ankiFields.Sentence;
+    }
+    if ($initialSide() === "front") return $ankiFields.Sentence;
+
+    if ($sentenceFuriganaHtml()) {
+      return applyBoldFormatting($ankiFields.Sentence, $sentenceFuriganaHtml());
     }
 
-    return $ankiFields["kanji:Sentence"];
+    return $ankiFields.Sentence;
   });
   const $sentenceTranslationField = createMemo(() => $ankiFields.SentenceTranslation);
   const $pictureField = createMemo(() => $ankiFields.Picture);
@@ -58,6 +62,7 @@ export function FieldGroupContextProvider(props: { children: JSX.Element }) {
 
   const $group = createMemo((): GroupData => {
     if (isServer) return $defaultGroup();
+    if (!$isRootAnkiFields()) return $defaultGroup();
     const ids = new Set<string>();
     const addId = (id: string | undefined) => {
       if (id) ids.add(id);

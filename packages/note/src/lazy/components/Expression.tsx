@@ -1,7 +1,6 @@
 import { createMemo, For, Match, Show, Switch } from "solid-js";
 import { parseHtml } from "#/src/lib/dom";
 import { extractKanji } from "#/src/lib/kana";
-import { parseFurigana } from "#/src/lib/parse-furigana";
 import { useAnkiFieldContext } from "#/src/contexts/AnkiFieldsContext";
 import { useCardContext } from "#/src/contexts/CardContext";
 import {
@@ -14,10 +13,7 @@ export function Expression() {
   const { $initialSide, $isInitialSide } = useCardContext();
 
   const $doc = createMemo(() => parseHtml($ankiFields.ExpressionFurigana));
-  const $isRuby = createMemo(() => $doc().querySelector("ruby"));
-  const $furiganaData = createMemo(() =>
-    parseFurigana($isRuby() ? "" : $ankiFields.ExpressionFurigana),
-  );
+  const $isRuby = createMemo(() => Boolean($doc().querySelector("ruby")));
 
   function ExpressionRuby() {
     return (
@@ -38,34 +34,6 @@ export function Expression() {
     );
   }
 
-  function ExpressionFurigana() {
-    return (
-      <For each={$furiganaData()}>
-        {(item) => (
-          <Switch>
-            <Match when={item.type === "ruby" && item}>
-              {(rubyItem) => (
-                <ruby>
-                  <For each={Array.from(rubyItem().text.trim())}>
-                    {(char) => <CharSpan char={char} />}
-                  </For>
-                  <Show when={rubyItem().reading.trim() !== "" || rubyItem().reading === " "}>
-                    <rt>{rubyItem().reading}</rt>
-                  </Show>
-                </ruby>
-              )}
-            </Match>
-            <Match when={item.type === "text" && item}>
-              <span>
-                <For each={Array.from(item.text.trim())}>{(char) => <CharSpan char={char} />}</For>
-              </span>
-            </Match>
-          </Switch>
-        )}
-      </For>
-    );
-  }
-
   return (
     <KanjiTooltipContextProvider>
       <Switch>
@@ -75,11 +43,8 @@ export function Expression() {
         <Match when={$isRuby()}>
           <ExpressionRuby />
         </Match>
-        <Match when={$furiganaData().length === 0 || !$ankiFields.ExpressionFurigana.includes("[")}>
-          <ExpressionNoFurigana />
-        </Match>
         <Match when={true}>
-          <ExpressionFurigana />
+          <ExpressionNoFurigana />
         </Match>
       </Switch>
     </KanjiTooltipContextProvider>

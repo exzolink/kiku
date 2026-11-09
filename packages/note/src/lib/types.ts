@@ -23,17 +23,11 @@ export type AnkiFields = {
   PitchCategories: string;
   Frequency: string;
   FreqSort: string;
+  Conjugation: string;
+  PartOfSpeech: string;
   MiscInfo: string;
   Tags: string;
   CardID: string;
-
-  // === Variants (for furigana/kana helpers) ===
-  "furigana:ExpressionFurigana": string;
-  "kana:ExpressionFurigana": string;
-  "furigana:Sentence": string;
-  "kanji:Sentence": string;
-  "furigana:SentenceFurigana": string;
-  "kana:SentenceFurigana": string;
   __IS_ROOT__?: boolean;
 };
 
@@ -127,15 +121,11 @@ export const ankiFieldsSkeleton: AnkiFields = {
   PitchCategories: "",
   Frequency: "",
   FreqSort: "",
+  Conjugation: "",
+  PartOfSpeech: "",
   MiscInfo: "",
   Tags: "",
   CardID: "",
-  "furigana:ExpressionFurigana": "",
-  "kana:ExpressionFurigana": "",
-  "furigana:Sentence": "",
-  "kanji:Sentence": "",
-  "furigana:SentenceFurigana": "",
-  "kana:SentenceFurigana": "",
 };
 
 export type PitchType = "heiban" | "atamadaka" | "nakadaka" | "odaka" | "kifuku";

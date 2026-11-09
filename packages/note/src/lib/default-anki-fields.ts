@@ -35,5 +35,7 @@ export const defaultAnkiFields: Record<string, AnkiFieldDefaults> = {
   PitchCategories: field(18, true),
   Frequency: field(18, true),
   FreqSort: field(18, true),
+  Conjugation: field(14, true),
+  PartOfSpeech: field(14, true),
   MiscInfo: field(18),
 };

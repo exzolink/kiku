@@ -20,7 +20,13 @@
     --color-pitch-content: var(--color-accent-content);
   }
 
+  ruby {
+    ruby-align: center;
+    ruby-overhang: none;
+  }
+
   ruby rt {
     user-select: none;
+    text-align: center;
   }
 }

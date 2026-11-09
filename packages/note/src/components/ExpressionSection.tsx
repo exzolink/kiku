@@ -19,7 +19,7 @@ export function ExpressionSection(props: { hideExpression?: boolean }) {
   const $expressionInnerHtml = createMemo(() => {
     if (isServer) return undefined;
     if ($isRootAnkiFields() && $ankiFields.ExpressionFurigana && $initialSide() === "back") {
-      return $ankiFields["furigana:ExpressionFurigana"];
+      return $ankiFields.ExpressionFurigana;
     }
     return $ankiFields.Expression;
   });
@@ -33,9 +33,8 @@ export function ExpressionSection(props: { hideExpression?: boolean }) {
       return "";
     }
 
-    return {
-      "data-pitch-type": getPitchType(),
-    };
+    const pitchType = getPitchType();
+    return pitchType ? { "data-pitch-type": pitchType } : {};
   });
 
   return (
@@ -55,7 +54,7 @@ export function ExpressionSection(props: { hideExpression?: boolean }) {
             innerHTML={
               $initialSide() === "front"
                 ? "{{Expression}}"
-                : "{{#ExpressionFurigana}}{{furigana:ExpressionFurigana}}{{/ExpressionFurigana}}{{^ExpressionFurigana}}{{Expression}}{{/ExpressionFurigana}}"
+                : "{{#ExpressionFurigana}}{{ExpressionFurigana}}{{/ExpressionFurigana}}{{^ExpressionFurigana}}{{Expression}}{{/ExpressionFurigana}}"
             }
           ></div>
         </Match>

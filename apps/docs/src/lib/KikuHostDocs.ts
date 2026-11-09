@@ -11,7 +11,7 @@ import kikuWorkerUrl from "@repo/note/_kiku_worker.js?url";
 //oxfmt-ignore
 const exampleFields = {
   "Expression": "貢献",
-  "ExpressionFurigana": "貢献[こうけん]",
+  "ExpressionFurigana": "<ruby>貢献<rt>こうけん</rt></ruby>",
   "ExpressionReading": "こうけん",
   "ExpressionAudio": "<a class=\"replay-button soundLink\" href=\"#\" onclick=\"return false;\" draggable=\"false\">\n    <svg class=\"playImage\" viewBox=\"0 0 64 64\" version=\"1.1\">\n        <circle cx=\"32\" cy=\"32\" r=\"29\"></circle>\n        <path d=\"M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z\"></path>\n    </svg>\n</a>",
   "RelatedExpression": "",
@@ -31,15 +31,11 @@ const exampleFields = {
   "PitchCategories": "",
   "Frequency": "",
   "FreqSort": "4509",
+  "Conjugation": "",
+  "PartOfSpeech": "",
   "MiscInfo": "",
   "Tags": "leech yomichan",
-  "CardID": "1763367941303",
-  "furigana:ExpressionFurigana": "<ruby><rb>貢献</rb><rt>こうけん</rt></ruby>",
-  "kana:ExpressionFurigana": "こうけん",
-  "furigana:Sentence": "<span data-group-id=\"11\">これで 少しは<br>世の中に<b>貢献</b>できるかな</span><span data-group-id=\"10\">どうせ勇者の捕縛に<b>貢献</b>すれば➡</span>このお店に<b>貢献</b>するために―",
-  "kanji:Sentence": "<span data-group-id=\"11\">これで 少しは<br>世の中に<b>貢献</b>できるかな</span><span data-group-id=\"10\">どうせ勇者の捕縛に<b>貢献</b>すれば➡</span>このお店に<b>貢献</b>するために―",
-  "furigana:SentenceFurigana": "",
-  "kana:SentenceFurigana": ""
+  "CardID": "1763367941303"
 }
 
 export class KikuHostDocs extends KikuHost {

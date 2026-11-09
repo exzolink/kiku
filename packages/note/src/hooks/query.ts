@@ -29,7 +29,7 @@ export function useCardQuery({
     return extractKanji(
       ankiFields.ExpressionFurigana
         ? isRoot
-          ? ankiFields["furigana:ExpressionFurigana"]
+          ? ankiFields.ExpressionFurigana
           : ankiFields.Expression
         : ankiFields.Expression,
     );

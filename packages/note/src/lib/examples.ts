@@ -3,7 +3,7 @@ import type { AnkiFields } from "#/src/lib/types";
 // oxfmt-ignore
 const exampleFields1: AnkiFields = {
   "Expression": "大好き",
-  "ExpressionFurigana": "大好[だいす]き",
+  "ExpressionFurigana": "<ruby>大好<rt>だいす</rt></ruby>き",
   "ExpressionReading": "だいすき",
   "ExpressionAudio": "<a class=\"replay-button soundLink\" href=\"#\" onclick=\"pycmd('play:a:0'); return false;\" draggable=\"false\">\n    <svg class=\"playImage\" viewBox=\"0 0 64 64\" version=\"1.1\">\n        <circle cx=\"32\" cy=\"32\" r=\"29\"></circle>\n        <path d=\"M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z\"></path>\n    </svg>\n</a>",
   "RelatedExpression": "",
@@ -23,15 +23,11 @@ const exampleFields1: AnkiFields = {
   "PitchCategories": "",
   "Frequency": "<ul style=\"text-align: left;\"><li>BCCWJ-LUW: 227</li><li>JPDBv2㋕: 108㋕</li><li>Conversation Corpus: 230</li><li>Conversation Corpus: 394</li><li>JLPT: N5</li></ul>",
   "FreqSort": "57",
+  "Conjugation": "",
+  "PartOfSpeech": "na-adj",
   "MiscInfo": "特定技能1号評価試験のテキスト",
   "Tags": "yomitan",
   "CardID": "1785064007553",
-  "furigana:ExpressionFurigana": "<ruby><rb>大好</rb><rt>だいす</rt></ruby>き",
-  "kana:ExpressionFurigana": "だいすき",
-  "furigana:Sentence": "「えへ。時雨は兄さまになでなでしてもらうの大好きです。えへ　～♪」　　「えへ。時雨は兄さまになでなでしてもらうの<b>大好き</b>です。えへ　～♪」",
-  "kanji:Sentence": "「えへ。時雨は兄さまになでなでしてもらうの大好きです。えへ　～♪」　　「えへ。時雨は兄さまになでなでしてもらうの<b>大好き</b>です。えへ　～♪」",
-  "furigana:SentenceFurigana": "",
-  "kana:SentenceFurigana": ""
 }
 
 export const exampleFields = exampleFields1;

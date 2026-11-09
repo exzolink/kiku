@@ -69,9 +69,8 @@ function SentenceField() {
 
   const expressionPitchDataset = () => {
     if ($initialSide() === "front" && $isInitialSide()) return {};
-    return {
-      "data-pitch-type": $pitchType(),
-    };
+    const pitchType = $pitchType();
+    return pitchType ? { "data-pitch-type": pitchType } : {};
   };
 
   return (

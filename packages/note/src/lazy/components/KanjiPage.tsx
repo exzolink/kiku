@@ -16,7 +16,6 @@ import { parseHtml } from "#/src/lib/dom";
 import { useNavigationTransition } from "#/src/hooks/transition";
 import { useRelatedNotes } from "#/src/hooks/notes";
 import { extractKanji } from "#/src/lib/kana";
-import { parseFurigana } from "#/src/lib/parse-furigana";
 import { type AnkiFields, type AnkiNote, type Source, ankiFieldsSkeleton } from "#/src/lib/types";
 import { useAnkiFieldContext } from "#/src/contexts/AnkiFieldsContext";
 import { useGeneralContext } from "#/src/contexts/GeneralContext";
@@ -92,10 +91,8 @@ function Page() {
     if ($kanjiPage.tab === "related") return "Связанные";
   });
 
-  const $doc = createMemo(() => parseHtml(initialAnkiFields.ExpressionFurigana));
-  const $isRuby = createMemo(() => $doc().querySelector("ruby"));
-  const $furiganaData = createMemo(() =>
-    parseFurigana($isRuby() ? "" : initialAnkiFields.ExpressionFurigana),
+  const $isRuby = createMemo(() =>
+    Boolean(parseHtml(initialAnkiFields.ExpressionFurigana).querySelector("ruby")),
   );
 
   onMount(() => {
@@ -193,45 +190,18 @@ function Page() {
                 <Match when={$isRuby()}>
                   <div innerHTML={initialAnkiFields.ExpressionFurigana}></div>
                 </Match>
-                <Match
-                  when={
-                    $furiganaData().length === 0 ||
-                    !initialAnkiFields.ExpressionFurigana.includes("[")
-                  }
-                >
+                <Match when={true}>
                   <ruby>
                     {initialAnkiFields.Expression}
                     <Show
                       when={
-                        initialAnkiFields.ExpressionFurigana &&
+                        initialAnkiFields.ExpressionReading &&
                         extractKanji(initialAnkiFields.Expression).length > 0
                       }
                     >
                       <rt>{initialAnkiFields.ExpressionReading}</rt>
                     </Show>
                   </ruby>
-                </Match>
-                <Match when={true}>
-                  <For each={$furiganaData()}>
-                    {(item) => (
-                      <Switch fallback={<span>{item.text}</span>}>
-                        <Match when={item.type === "ruby" && item}>
-                          {(rubyItem) => (
-                            <ruby>
-                              {rubyItem().text}
-                              <Show
-                                when={
-                                  rubyItem().reading.trim() !== "" || rubyItem().reading === " "
-                                }
-                              >
-                                <rt>{rubyItem().reading}</rt>
-                              </Show>
-                            </ruby>
-                          )}
-                        </Match>
-                      </Switch>
-                    )}
-                  </For>
                 </Match>
               </Switch>
             </div>
@@ -428,9 +398,14 @@ function AnkiNoteItem(props: { data: AnkiNote; highlightedKanji?: string; source
   const $$isNew = createMemo(
     () => $$card()?.newNotes.some((n) => n.noteId === $data().noteId) ?? false,
   );
-  const $doc = createMemo(() => parseHtml($expressionFurigana()));
-  const $isRuby = createMemo(() => $doc().querySelector("ruby"));
-  const $furiganaData = createMemo(() => parseFurigana($isRuby() ? "" : $expressionFurigana()));
+  const $isRuby = createMemo(() => Boolean(parseHtml($expressionFurigana()).querySelector("ruby")));
+
+  const $expressionHtml = createMemo(() => {
+    const html = $expressionFurigana();
+    const kanji = props.highlightedKanji;
+    if (!html || !kanji) return html;
+    return html.replaceAll(kanji, `<span class="text-base-content-primary">${kanji}</span>`);
+  });
 
   function ExpressionNoFurigana() {
     return (
@@ -450,40 +425,6 @@ function AnkiNoteItem(props: { data: AnkiNote; highlightedKanji?: string; source
           <rt>{$expressionReading()}</rt>
         </Show>
       </ruby>
-    );
-  }
-
-  function ExpressionFurigana() {
-    return (
-      <For each={$furiganaData()}>
-        {(item) => (
-          <Switch>
-            <Match when={item.type === "ruby" && item}>
-              {(rubyItem) => (
-                <ruby>
-                  <For each={Array.from(rubyItem().text.trim())}>
-                    {(char) => (
-                      <span
-                        classList={{
-                          "text-base-content-primary": char === props.highlightedKanji,
-                        }}
-                      >
-                        {char}
-                      </span>
-                    )}
-                  </For>
-                  <Show when={rubyItem().reading.trim() !== "" || rubyItem().reading === " "}>
-                    <rt>{rubyItem().reading}</rt>
-                  </Show>
-                </ruby>
-              )}
-            </Match>
-            <Match when={item.type === "text" && item}>
-              <span>{item.text}</span>
-            </Match>
-          </Switch>
-        )}
-      </For>
     );
   }
 
@@ -524,11 +465,11 @@ function AnkiNoteItem(props: { data: AnkiNote; highlightedKanji?: string; source
           <div class="flex gap-2 items-end">
             <div class="font-japanese-display text-xl sm:text-3xl" lang="ja">
               <Switch>
-                <Match when={$isRuby() || $furiganaData().length === 0}>
-                  <ExpressionNoFurigana />
+                <Match when={$isRuby()}>
+                  <div innerHTML={$expressionHtml()}></div>
                 </Match>
                 <Match when={true}>
-                  <ExpressionFurigana />
+                  <ExpressionNoFurigana />
                 </Match>
               </Switch>
             </div>
