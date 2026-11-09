@@ -30,7 +30,6 @@ import type { UseBreakpointContext } from "#/src/contexts/BreakpointContext";
 import type { UseCardContext } from "#/src/contexts/CardContext";
 import type { UseConfigContext } from "#/src/contexts/ConfigContext";
 import type { UseGeneralContext } from "#/src/contexts/GeneralContext";
-import type { PitchInfo } from "#/src/lib/hatsuon";
 import type { AnkiFields } from "#/src/lib/types";
 
 /**
@@ -163,24 +162,6 @@ export type KikuPlugin = {
    * Adds custom content at the very end of the card (front and back).
    */
   CardEnd?: (props: { ctx: Ctx }) => JSX.Element | JSX.Element[];
-
-  /**
-   * Customizes the Pitch Accent visualizations.
-   * This is called for every pitch info entry found for the word.
-   */
-  Pitch?: (props: {
-    /** Data about the pitch (morae, accent index, etc.). */
-    pitchInfo: PitchInfo;
-    /** The index if multiple pitch entries exist. */
-    index: number;
-    /** The original Kiku pitch component. */
-    DefaultPitch: (props: {
-      pitchInfo: PitchInfo;
-      index: number;
-      ref?: (ref: HTMLDivElement) => void;
-    }) => JSX.Element;
-    ctx: Ctx;
-  }) => JSX.Element | JSX.Element[];
 
   /**
    * Customizes the extended Kanji Information section.

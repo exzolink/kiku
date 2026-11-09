@@ -1,10 +1,8 @@
 import { useAnkiFieldContext } from "#/src/contexts/AnkiFieldsContext";
 import { parseHtml } from "#/src/lib/dom";
 import { unique } from "#/src/lib/es";
-import { hatsuon } from "#/src/lib/hatsuon";
 import { pitchTypes, type PitchType } from "#/src/lib/types";
 import { createMemo } from "solid-js";
-import { isServer } from "solid-js/web";
 
 export function extractPitchNumbers(html: string) {
   if (!html) return [];
@@ -34,49 +32,54 @@ export function normalizePitchType(s: string) {
   if (pitchCategory === "尾高") pitchCategory = "odaka";
   if (pitchCategory === "起伏") pitchCategory = "kifuku";
   if (!pitchTypes.includes(pitchCategory as PitchType)) pitchCategory = null;
-  return pitchCategory;
+  return pitchCategory as PitchType | null;
+}
+
+const pitchTypeLabels: Record<PitchType, { ja: string; romaji: string; description: string }> = {
+  heiban: {
+    ja: "平板",
+    romaji: "heiban",
+    description: "Первый слог низкий, остальные высокие;\nчастица остаётся высокой.",
+  },
+  atamadaka: {
+    ja: "頭高",
+    romaji: "atamadaka",
+    description: "Первый слог высокий, остальные низкие;\nчастица низкая.",
+  },
+  nakadaka: {
+    ja: "中高",
+    romaji: "nakadaka",
+    description: "Начало низкое, затем подъём и спад до низкой частицы.",
+  },
+  odaka: {
+    ja: "尾高",
+    romaji: "odaka",
+    description: "Первый слог низкий, остальные высокие;\nчастица падает.",
+  },
+  kifuku: {
+    ja: "起伏",
+    romaji: "kifuku",
+    description: "Сложный / волнообразный тон (обычно у глаголов и прилагательных).",
+  },
+};
+
+export function getPitchTypeInfo(type: PitchType | null | undefined) {
+  if (!type) return undefined;
+  return pitchTypeLabels[type];
 }
 
 export function usePitch() {
-  const { $ankiFields, $isRootAnkiFields } = useAnkiFieldContext();
+  const { $ankiFields } = useAnkiFieldContext();
 
-  const $pitchNumbers = createMemo(() => extractPitchNumbers($ankiFields.PitchPosition));
+  const $pitchCategories = createMemo(() =>
+    $ankiFields.PitchCategories.split(",")
+      .map((s) => normalizePitchType(s))
+      .filter((v): v is PitchType => v != null),
+  );
 
-  const $reading = createMemo(() => {
-    if (!$isRootAnkiFields() || isServer) return $ankiFields.ExpressionReading;
-    const doc = parseHtml($ankiFields.ExpressionFurigana);
-    const isRuby = !!doc.querySelector("ruby");
-    if (isRuby) return $ankiFields.ExpressionReading;
-    return $ankiFields.ExpressionFurigana
-      ? $ankiFields["kana:ExpressionFurigana"]
-      : $ankiFields.ExpressionReading;
-  });
+  const $pitchType = createMemo(() => $pitchCategories()[0]);
 
-  const $pitchInfos = createMemo(() => {
-    const numbers = $pitchNumbers();
-    const reading = $reading();
-    if (!numbers.length) return [];
-    const pitchCategories = $ankiFields.PitchCategories.split(",").map((s) => {
-      return normalizePitchType(s);
-    });
-    return numbers.map((pitchNum, i) => {
-      const result = hatsuon({ reading, pitchNum, locale: "EN" });
-      if (
-        pitchCategories.length === numbers.length &&
-        pitchCategories[i] === "kifuku" &&
-        result.patternName !== "heiban"
-      ) {
-        result.patternName = pitchCategories[i] ?? result.patternName;
-      }
-      return result;
-    });
-  });
+  const $hasPitchPosition = createMemo(() => Boolean($ankiFields.PitchPosition?.trim()));
 
-  const $pitchType = createMemo(() => {
-    const info = $pitchInfos()[0];
-    if (!info) return undefined;
-    return info.patternName as PitchType;
-  });
-
-  return { $pitchInfos, $pitchType };
+  return { $pitchCategories, $pitchType, $hasPitchPosition };
 }
