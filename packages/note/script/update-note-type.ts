@@ -61,6 +61,8 @@ class Script {
     const required = [
       { name: "RuDefinition", after: "MainDefinition" },
       { name: "EngDefinition", after: "RuDefinition" },
+      { name: "Conjugation", after: "FreqSort" },
+      { name: "PartOfSpeech", after: "Conjugation" },
     ];
 
     for (const field of required) {

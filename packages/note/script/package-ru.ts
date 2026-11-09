@@ -137,6 +137,13 @@ function setField(values: string[], fieldIndex: Map<string, number>, field: stri
   values[index] = value;
 }
 
+const removedUpstreamFields = [
+  "IsWordAndSentenceCard",
+  "IsClickCard",
+  "IsSentenceCard",
+  "IsAudioCard",
+] as const;
+
 function reindexFields(model: Model) {
   model.flds.forEach((field, index) => {
     field.ord = index;
@@ -166,6 +173,18 @@ function insertModelField(model: Model, fieldName: string, after: string) {
   return index;
 }
 
+function removeModelFields(model: Model, fieldNames: readonly string[]) {
+  const removedAt = model.flds
+    .map((field, index) => (fieldNames.includes(field.name) ? index : -1))
+    .filter((index) => index >= 0)
+    .sort((a, b) => b - a);
+  for (const index of removedAt) {
+    model.flds.splice(index, 1);
+  }
+  reindexFields(model);
+  return removedAt;
+}
+
 function applyDefaultFieldSettings(model: Model) {
   for (const field of model.flds) {
     const defaults = defaultAnkiFields[field.name];
@@ -176,13 +195,19 @@ function applyDefaultFieldSettings(model: Model) {
   }
 }
 
-function ensureNoteFieldCount(
+function rewriteNoteFields(
   database: DatabaseSync,
   modelId: string,
   fieldCount: number,
-  insertedAt: number[],
+  {
+    removedAt = [],
+    insertedAt = [],
+  }: {
+    removedAt?: number[];
+    insertedAt?: number[];
+  },
 ) {
-  if (insertedAt.length === 0) return;
+  if (removedAt.length === 0 && insertedAt.length === 0) return;
   const rows = database
     .prepare("SELECT id, flds FROM notes WHERE mid = ?")
     .all(Number(modelId)) as { id: number; flds: string }[];
@@ -191,6 +216,9 @@ function ensureNoteFieldCount(
 
   for (const row of rows) {
     const fields = row.flds.split("\x1f");
+    for (const index of removedAt) {
+      if (index < fields.length) fields.splice(index, 1);
+    }
     for (const index of insertedAt) {
       fields.splice(index, 0, "");
     }
@@ -280,13 +308,16 @@ async function updateCollection(collectionPath: string) {
     template.afmt = applyDefaultDataAttributes(back);
     deckEntry[1].name = noteIdentity.deck;
 
+    const removedAt = removeModelFields(model, removedUpstreamFields);
     const insertedAt = [
       insertModelField(model, "RuDefinition", "MainDefinition"),
       insertModelField(model, "EngDefinition", "RuDefinition"),
+      insertModelField(model, "Conjugation", "FreqSort"),
+      insertModelField(model, "PartOfSpeech", "Conjugation"),
     ].filter((index) => index >= 0);
     // Insert higher indices first so earlier splice positions stay valid when padding notes.
     insertedAt.sort((a, b) => b - a);
-    ensureNoteFieldCount(database, modelId, model.flds.length, insertedAt);
+    rewriteNoteFields(database, modelId, model.flds.length, { removedAt, insertedAt });
     applyDefaultFieldSettings(model);
 
     localizeSampleNotes(database, modelId, model);
