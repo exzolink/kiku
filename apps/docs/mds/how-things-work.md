@@ -96,5 +96,6 @@ CSS загружается сразу, а JavaScript запускается по
   "fontSizeSmSentence",
   "fontSizeSmMiscInfo",
   "fontSizeSmHint",
+  "typeReading",
 ];
 ```

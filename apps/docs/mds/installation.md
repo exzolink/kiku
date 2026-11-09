@@ -27,7 +27,7 @@ Kiku RU совместим с [Lapis](https://github.com/donkuri/lapis), поэ�
 | Поле                  | Значение                                                                                                            |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | Expression            | `{expression}`                                                                                                      |
-| ExpressionFurigana    | `{furigana-plain}`                                                                                                  |
+| ExpressionFurigana    | `{furigana}` (HTML ruby, не `{furigana-plain}`)                                                                     |
 | ExpressionReading     | `{reading}`                                                                                                         |
 | ExpressionAudio       | `{audio}`                                                                                                           |
 | RelatedExpression     |                                                                                                                     |
@@ -35,18 +35,20 @@ Kiku RU совместим с [Lapis](https://github.com/donkuri/lapis), поэ�
 | MainDefinition        | Например, `{single-glossary-jmdict/jitendex}`. Нажмите стрелку рядом с полем и выберите словарь с похожим форматом. |
 | RuDefinition          | Русский словарь, например `{single-glossary-…}`. Показывается слева от основного определения.                       |
 | EngDefinition         | Английский словарь, например `{single-glossary-…}`. Показывается справа от основного определения.                   |
-| DefinitionPicture     | Здесь можно добавить изображение, которое поясняет значение слова.                                                  |
+| DefinitionPicture     | Картинка или набор картинок/SVG, поясняющих значение. Можно вставить изображения из аддона [Kanji Colorizer](https://ankiweb.net/shared/info/1964372878). |
 | Sentence              | `{cloze-prefix}<b>{cloze-body}</b>{cloze-suffix}`                                                                   |
-| SentenceFurigana      | `{sentence-furigana-plain}`                                                                                         |
+| SentenceFurigana      | `{sentence-furigana}`                                                                                               |
 | SentenceTranslation   |                                                                                                                     |
 | SentenceAudio         |                                                                                                                     |
 | Picture               |                                                                                                                     |
 | Glossary              | `{glossary}`                                                                                                        |
 | Hint                  |                                                                                                                     |
-| PitchPosition         | `{pitch-accent-positions}`                                                                                          |
+| PitchPosition         | `{pitch-accent-graphs-jj}`                                                                                          |
 | PitchCategories       | `{pitch-accent-categories}`                                                                                         |
 | Frequency             | `{frequencies}`                                                                                                     |
 | FreqSort              | `{frequency-harmonic-rank}`                                                                                         |
+| Conjugation           | Например, `{conjugation}`. Показывается бейджами под частотностью.                                                  |
+| PartOfSpeech          | Часть речи. Значение `Unknown` скрывается.                                                                          |
 | MiscInfo              | `{document-title}` добавляет заголовок вкладки, из которой создана карточка. Это удобно, например, для ранобэ.      |
 
 Таблица основана на инструкции [Lapis](https://github.com/donkuri/lapis).
