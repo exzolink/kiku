@@ -6,14 +6,16 @@ import { PlayIcon } from "./Icons";
 
 function NotePlayIcon(props: { "on:click"?: () => void; color: "primary" | "secondary" }) {
   return (
-    <button on:click={props["on:click"]} on:touchend={(e) => e.stopPropagation()}>
-      <PlayIcon
-        class="bg-primary rounded-full text-primary-content p-1 w-8 h-8 cursor-pointer"
-        classList={{
-          "bg-primary text-primary-content": props.color === "primary",
-          "bg-secondary text-secondary-content": props.color === "secondary",
-        }}
-      />
+    <button
+      class="size-7 sm:size-6 rounded-full p-1 cursor-pointer flex items-center justify-center"
+      classList={{
+        "bg-primary text-primary-content": props.color === "primary",
+        "bg-secondary text-secondary-content": props.color === "secondary",
+      }}
+      on:click={props["on:click"]}
+      on:touchend={(e) => e.stopPropagation()}
+    >
+      <PlayIcon class="size-full" />
     </button>
   );
 }

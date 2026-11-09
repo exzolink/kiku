@@ -15,7 +15,7 @@ const Lazy = {
 export function PictureSection() {
   const { $card, $isInitialSide } = useCardContext();
   const { $group } = useFieldGroupContext();
-  const { $ankiFields } = useAnkiFieldContext();
+  const { $ankiFields, $isRootAnkiFields } = useAnkiFieldContext();
   const { $setPictureModal } = usePictureModalTransition();
   const [$clicked, $setClicked] = createSignal(false);
   const [$subIndex, $setSubIndex] = createSignal(0);
@@ -23,7 +23,9 @@ export function PictureSection() {
   const $pictures = createMemo(() => {
     if (isServer) return [];
     const doc = parseHtml($group().pictureField);
-    return Array.from(doc.querySelectorAll("img")).map((img) => img.outerHTML);
+    return Array.from(doc.querySelectorAll("img"))
+      .filter((img) => Boolean(img.getAttribute("src")?.trim()))
+      .map((img) => img.outerHTML);
   });
 
   const $currentPicture = createMemo(() => $pictures()[$subIndex()] || "");
@@ -39,13 +41,19 @@ export function PictureSection() {
   // NOTE: if the first data-group-id has no picture, the SSR output will still display the first picture from Picture field.
   // This is a bug but it still preferable than having a layout shift.
   const $dataSet1 = createMemo<DatasetProp>(() => ({
-    "data-has-picture": isServer ? "{{#Picture}}true{{/Picture}}" : $currentPicture() ? "true" : "",
+    "data-has-picture": isServer
+      ? "{{#Picture}}true{{/Picture}}"
+      : $currentPicture()
+        ? "true"
+        : undefined,
   }));
 
+  const $hasPicture = createMemo(() => Boolean($currentPicture()));
+
   const $opacity = createMemo(() => {
-    if ($clicked()) return 1;
-    if (!$clicked() && $isInitialSide()) return undefined;
-    if (!$clicked() && !$isInitialSide()) return 0;
+    if (!$isRootAnkiFields() || $card.side === "back" || $clicked()) return 1;
+    if ($isInitialSide()) return undefined;
+    return 0;
   });
 
   createEffect(
@@ -57,7 +65,7 @@ export function PictureSection() {
 
   createEffect(
     on(
-      () => $isInitialSide(),
+      () => [$isInitialSide(), $ankiFields.CardID] as const,
       () => $setClicked(false),
     ),
   );
@@ -75,6 +83,7 @@ export function PictureSection() {
   return (
     <div
       class="picture-field-container tappable"
+      classList={{ "has-picture": !isServer && $hasPicture() }}
       on:click={() => $setClicked((prev) => !prev)}
       on:touchend={(e) => e.stopPropagation()}
       {...$dataSet1()}

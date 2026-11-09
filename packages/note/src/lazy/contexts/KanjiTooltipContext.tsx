@@ -7,7 +7,6 @@ import { Portal } from "solid-js/web";
 import { extractKanji } from "#/src/lib/kana";
 import { useBreakpointContext } from "#/src/contexts/BreakpointContext";
 import { useGeneralContext } from "#/src/contexts/GeneralContext";
-import { XIcon } from "#/src/lazy/components/Icons";
 import { KanjiContextProvider } from "./KanjiContext";
 import { $KanjiInfo, $KanjiInfoExtra } from "#/src/lazy/components/KanjiInfo";
 
@@ -191,14 +190,6 @@ function KanjiTooltip() {
             }}
           ></div>
 
-          <button
-            data-anki-mobile-only="block"
-            class="absolute z-20 top-2 right-2"
-            on:click={onInactiveTooltip}
-            on:touchend={(e) => e.stopPropagation()}
-          >
-            <XIcon class="size-5 cursor-pointer text-base-content-soft" />
-          </button>
           <div
             class="relative text-base bg-base-200 z-10 p-2 sm:p-4 border border-base-300 rounded-lg font-cyrillic w-xs sm:w-md lg:w-lg shadow-lg max-h-[75vh] overflow-auto"
             lang="ru"

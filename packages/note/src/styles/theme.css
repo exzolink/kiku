@@ -2,4 +2,34 @@
 @theme {
   --color-pitch: inherit;
   --color-pitch-content: inherit;
+
+  --spacing: 4px;
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+  --text-base: 16px;
+  --text-base--line-height: 24px;
+  --text-lg: 18px;
+  --text-lg--line-height: 28px;
+  --text-xl: 20px;
+  --text-xl--line-height: 28px;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 32px;
+  --text-2_5xl: 27px;
+  --text-2_5xl--line-height: 34px;
+  --text-3xl: 30px;
+  --text-3xl--line-height: 36px;
+  --text-4xl: 36px;
+  --text-4xl--line-height: 40px;
+  --text-5xl: 48px;
+  --text-5xl--line-height: 1;
+  --text-6xl: 60px;
+  --text-6xl--line-height: 1;
+  --text-7xl: 72px;
+  --text-7xl--line-height: 1;
+  --text-8xl: 96px;
+  --text-8xl--line-height: 1;
+  --text-9xl: 128px;
+  --text-9xl--line-height: 1;
 }

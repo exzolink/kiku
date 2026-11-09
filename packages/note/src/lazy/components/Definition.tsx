@@ -218,7 +218,7 @@ export function Definition() {
 
             <Show when={$showExtras()}>
               <For each={$extraCenterPages()}>
-                {(page) => <DefinitionCard name={page.name} html={page.html} />}
+                {(page) => <DefinitionCard name={page.name} html={page.html} compact />}
               </For>
             </Show>
           </div>
@@ -247,7 +247,7 @@ function DefinitionCard(props: {
   return (
     <div data-dictionary={props.name}>
       <div
-        class="relative bg-base-200 p-2 sm:p-4 border-s-4 rounded-lg definition-field"
+        class="relative bg-base-200 p-1.5 sm:p-3 border-s-4 rounded-lg definition-field"
         classList={{
           "text-sm sm:text-base": props.compact,
           "text-base sm:text-lg": !props.compact,

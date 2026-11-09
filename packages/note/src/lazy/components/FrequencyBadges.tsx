@@ -14,10 +14,16 @@ export function FrequencyBadges() {
 
   return (
     <Show when={$frequencies().length}>
-      <div class="flex gap-2 items-center justify-center flex-wrap">
-        <For each={$frequencies()}>
-          {(frequency) => <div class="badge badge-secondary">{frequency}</div>}
-        </For>
+      <div class="w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div class="flex gap-1.5 sm:gap-2 items-center justify-start sm:justify-center flex-nowrap w-max min-w-full sm:min-w-0 sm:flex-wrap sm:w-auto mx-auto">
+          <For each={$frequencies()}>
+            {(frequency) => (
+              <div class="badge badge-secondary shrink-0 h-5 min-h-5 px-1.5 text-xs sm:h-6 sm:min-h-6 sm:px-2.5 sm:text-sm">
+                {frequency}
+              </div>
+            )}
+          </For>
+        </div>
       </div>
     </Show>
   );
