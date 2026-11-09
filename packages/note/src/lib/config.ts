@@ -34,6 +34,7 @@ export type KikuConfig = {
   definitionPictureFromGlossary: boolean;
   extraDefinitionsVisibility: ExtraDefinitionsVisibility;
   sentenceFuriganaAlwaysVisible: boolean;
+  typeReading: boolean;
   relatedExpressionExcludeNewCards: boolean;
   relatedExpressionFallback: boolean;
   fontSizeBaseExpression: TailwindSize;
@@ -54,7 +55,7 @@ export type KikuConfig = {
 };
 
 // oxfmt-ignore
-export const tailwindSize = [ "xs", "sm", "md", "lg", "xl", "2xl", "3xl", "4xl", "5xl", "6xl", "7xl", "8xl", "9xl", ] as const;
+export const tailwindSize = [ "xs", "sm", "md", "lg", "xl", "2xl", "2.5xl", "3xl", "4xl", "5xl", "6xl", "7xl", "8xl", "9xl", ] as const;
 export type TailwindSize = (typeof tailwindSize)[number];
 
 export const definitionStyle = ["normal", "single-page", "glossary-split"] as const;
@@ -62,6 +63,7 @@ export type DefinitionStyle = (typeof definitionStyle)[number];
 export const extraDefinitionsVisibility = ["always", "on-key"] as const;
 export type ExtraDefinitionsVisibility = (typeof extraDefinitionsVisibility)[number];
 export const EXTRA_DEFINITIONS_TOGGLE_KEY = "z";
+export const RELATED_EXPRESSION_TOGGLE_KEY = "x";
 export const tailwindFontSizeVar = {
   xs: { fontSize: "var(--text-xs)", lineHeight: "var(--text-xs--line-height)" },
   sm: { fontSize: "var(--text-sm)", lineHeight: "var(--text-sm--line-height)" },
@@ -69,6 +71,7 @@ export const tailwindFontSizeVar = {
   lg: { fontSize: "var(--text-lg)", lineHeight: "var(--text-lg--line-height)" },
   xl: { fontSize: "var(--text-xl)", lineHeight: "var(--text-xl--line-height)" },
   "2xl": { fontSize: "var(--text-2xl)", lineHeight: "var(--text-2xl--line-height)" },
+  "2.5xl": { fontSize: "var(--text-2_5xl)", lineHeight: "var(--text-2_5xl--line-height)" },
   "3xl": { fontSize: "var(--text-3xl)", lineHeight: "var(--text-3xl--line-height)" },
   "4xl": { fontSize: "var(--text-4xl)", lineHeight: "var(--text-4xl--line-height)" },
   "5xl": { fontSize: "var(--text-5xl)", lineHeight: "var(--text-5xl--line-height)" },
@@ -128,6 +131,7 @@ export function validateConfig(config: KikuConfig, logger?: Logger): KikuConfig 
       definitionPictureFromGlossary: typeof config.definitionPictureFromGlossary === "boolean" ? config.definitionPictureFromGlossary : defaultConfig.definitionPictureFromGlossary,
       extraDefinitionsVisibility: extraDefinitionsVisibility.includes(config.extraDefinitionsVisibility) ? config.extraDefinitionsVisibility : defaultConfig.extraDefinitionsVisibility,
       sentenceFuriganaAlwaysVisible: typeof config.sentenceFuriganaAlwaysVisible === "boolean" ? config.sentenceFuriganaAlwaysVisible : defaultConfig.sentenceFuriganaAlwaysVisible,
+      typeReading: typeof config.typeReading === "boolean" ? config.typeReading : defaultConfig.typeReading,
       relatedExpressionExcludeNewCards: typeof config.relatedExpressionExcludeNewCards === "boolean" ? config.relatedExpressionExcludeNewCards : defaultConfig.relatedExpressionExcludeNewCards,
       relatedExpressionFallback: typeof config.relatedExpressionFallback === "boolean" ? config.relatedExpressionFallback : defaultConfig.relatedExpressionFallback,
 

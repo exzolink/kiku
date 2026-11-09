@@ -363,6 +363,11 @@ function DefinitionSettings() {
           label="Фуригана в предложении всегда видна"
           tooltip="На обратной стороне фуригана в предложении показывается без наведения."
         />
+        <ToggleSetting
+          configKey="typeReading"
+          label="Ввод чтения на лицевой стороне"
+          tooltip="На лицевой стороне — поле для ввода ExpressionReading. После переворота сверху на пару секунд: Верно или Ошибка."
+        />
       </div>
     </Section>
   );

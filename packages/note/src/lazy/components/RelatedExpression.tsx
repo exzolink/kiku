@@ -10,13 +10,18 @@ import {
   Show,
   Suspense,
 } from "solid-js";
+import { createStore } from "solid-js/store";
+import { Portal } from "solid-js/web";
+import { computePosition, flip, offset, shift } from "@floating-ui/dom";
 import { ankiFieldsSkeleton, type AnkiNote } from "#/src/lib/types";
 import { useAnkiFieldContext } from "#/src/contexts/AnkiFieldsContext";
+import { useBreakpointContext } from "#/src/contexts/BreakpointContext";
 import { useCardContext } from "#/src/contexts/CardContext";
-import { useGeneralContext } from "#/src/contexts/GeneralContext";
 import { useConfigContext } from "#/src/contexts/ConfigContext";
-import { MoveDown } from "./Icons";
+import { useGeneralContext } from "#/src/contexts/GeneralContext";
+import { RELATED_EXPRESSION_TOGGLE_KEY } from "#/src/lib/config";
 import { preloadImages } from "#/src/lib/dom";
+import { GitPullRequestArrow, MoveDown } from "./Icons";
 
 const sortNote = (a: AnkiNote, b: AnkiNote) => b.noteId - a.noteId;
 
@@ -30,15 +35,10 @@ const dedupeByCardId = (notes: AnkiNote[]) => {
   });
 };
 
-function $RelatedExpression() {
-  const { logger } = useGeneralContext();
-  const { $card, $setCard, $initialSide, $$card } = useCardContext();
+function useRelatedExpressionNotes() {
   const { $config } = useConfigContext();
-  const { $ankiFields, $setAnkiFields, resetAnkiFields, initialAnkiFields, $isInitialAnkiFields } =
-    useAnkiFieldContext();
-  const [$ref, $setRef] = createSignal<HTMLDivElement>();
-
-  const $displayExpression = createMemo(() => initialAnkiFields.Expression);
+  const { $initialSide, $$card } = useCardContext();
+  const { initialAnkiFields } = useAnkiFieldContext();
 
   const $relatedExpression = createMemo(() => {
     const query = $$card();
@@ -46,7 +46,6 @@ function $RelatedExpression() {
     const excludeNewCards = $config.relatedExpressionExcludeNewCards;
     const newCardIds = new Set(query.newNotes.flatMap((n) => n.cards));
 
-    // On front side, only show cards with the same expression but different reading
     if ($initialSide() === "front") {
       return [...(query.sameExpression ?? [])]
         .filter((v) => {
@@ -60,23 +59,18 @@ function $RelatedExpression() {
         .sort(sortNote);
     }
 
-    // Priority 1: same expression, same reading, same kanji
     let fallbackPriority1 = [
       ...(query.sameExpression ?? []),
       ...(query.sameReading ?? []),
-      ...query.noteList.flatMap((n) => {
-        return n[1];
-      }),
+      ...query.noteList.flatMap((n) => n[1]),
     ];
 
-    // Priority 2: forms, antonym, referenced
     let fallbackPriority2 = [
       ...(query.forms ?? []),
       ...(query.antonym ?? []),
       ...(query.referenced ?? []),
     ];
 
-    // Priority 3: related expression
     let relatedExpression = query.relatedExpression;
 
     if (excludeNewCards) {
@@ -93,7 +87,6 @@ function $RelatedExpression() {
     fallbackPriority1 = fallbackPriority1.sort(sortNote);
     fallbackPriority2 = fallbackPriority2.sort(sortNote);
 
-    // If related expression is less than 2, fill with fallback priority 2 and 1
     if (relatedExpression?.length && relatedExpression.length < 2) {
       return dedupeByCardId([
         ...relatedExpression,
@@ -109,10 +102,20 @@ function $RelatedExpression() {
 
   const $newNotes = createMemo(() => new Set($$card()?.newNotes.flatMap((n) => n.cards) ?? []));
   const $isNewNote = createMemo(() => $newNotes().has(Number(initialAnkiFields.CardID)));
+  const $hasContent = createMemo(
+    () => $relatedExpression().length > 0 || ($isNewNote() && $initialSide() === "back"),
+  );
 
-  const isExplicitRelatedExpression = (note: AnkiNote) => {
-    return $$card()?.relatedExpression?.some((n) => n.noteId === note.noteId) ?? false;
-  };
+  return { $relatedExpression, $newNotes, $isNewNote, $hasContent };
+}
+
+const playedCardIds = new Set<string>();
+
+function useRelatedExpressionPlayback() {
+  const { logger } = useGeneralContext();
+  const { $card } = useCardContext();
+  const { $ankiFields, $isInitialAnkiFields } = useAnkiFieldContext();
+  const { $relatedExpression } = useRelatedExpressionNotes();
 
   createEffect(
     on(
@@ -124,35 +127,66 @@ function $RelatedExpression() {
     ),
   );
 
-  const played = new Set<string>();
   createEffect(
     on(
       () => $ankiFields.CardID,
       () => {
         if ($isInitialAnkiFields()) return;
-        if (played.has($ankiFields.CardID)) return;
-        played.add($ankiFields.CardID);
-        const audio =
+        if (playedCardIds.has($ankiFields.CardID)) return;
+        playedCardIds.add($ankiFields.CardID);
+
+        const playSentence = () => {
+          const sentence =
+            $card.sentenceAudioRef?.querySelector("a") ??
+            $card.sentenceAudioRef?.querySelector("audio") ??
+            $card.sentenceAudios?.[0];
+          if (!sentence) {
+            logger.debug("[RelatedExpression] autoPlay: no sentence audio to chain");
+            return;
+          }
+          logger.info("[RelatedExpression] autoPlay: sentence");
+          if (sentence instanceof HTMLAnchorElement) sentence.click();
+          if (sentence instanceof HTMLAudioElement) void sentence.play();
+        };
+
+        const expression =
           $card.expressionAudioRef?.querySelector("a") ??
           $card.expressionAudioRef?.querySelector("audio");
-        if (audio) {
+        if (expression) {
           logger.info("[RelatedExpression] autoPlay: expression");
-          if (audio instanceof HTMLAnchorElement) audio.click();
-          if (audio instanceof HTMLAudioElement) void audio.play();
+          if (expression instanceof HTMLAnchorElement) expression.click();
+          if (expression instanceof HTMLAudioElement) {
+            void expression.play();
+            expression.onended = () => playSentence();
+            expression.onpause = () => {
+              if (expression.ended || expression.currentTime === 0) playSentence();
+            };
+          } else {
+            setTimeout(playSentence, 800);
+          }
         } else {
           logger.debug("[RelatedExpression] autoPlay: no expression audio to play");
+          playSentence();
         }
       },
-      {
-        defer: true,
-      },
+      { defer: true },
     ),
   );
+}
 
+function RelatedExpressionList() {
+  const { $setCard, $initialSide, $$card } = useCardContext();
+  const { $ankiFields, $setAnkiFields, resetAnkiFields, initialAnkiFields, $isInitialAnkiFields } =
+    useAnkiFieldContext();
+  const { $relatedExpression, $newNotes, $isNewNote, $hasContent } = useRelatedExpressionNotes();
+  const [$ref, $setRef] = createSignal<HTMLDivElement>();
   const [$hasMultipleRows, $setHasMultipleRows] = createSignal(false);
-  const $hasContent = createMemo(
-    () => $relatedExpression().length > 0 || ($isNewNote() && $initialSide() === "back"),
-  );
+
+  const $displayExpression = createMemo(() => initialAnkiFields.Expression);
+
+  const isExplicitRelatedExpression = (note: AnkiNote) => {
+    return $$card()?.relatedExpression?.some((n) => n.noteId === note.noteId) ?? false;
+  };
 
   onMount(() => {
     const ref = $ref();
@@ -174,15 +208,13 @@ function $RelatedExpression() {
     <Show when={$hasContent()}>
       <div
         ref={$setRef}
-        class="flex gap-x-2 sm:gap-x-4 flex-wrap relative text-lg sm:text-xl mb-0.5 sm:mb-2"
+        class="flex gap-x-2 sm:gap-x-4 flex-wrap relative text-base sm:text-lg"
       >
         <div class="flex gap-px items-center">
           <MoveDown
             class="size-4 sm:size-5 text-base-content-faint"
-            classList={{
-              hidden: !$hasMultipleRows(),
-            }}
-          ></MoveDown>
+            classList={{ hidden: !$hasMultipleRows() }}
+          />
           <button
             class="hover:text-base-content cursor-pointer indicator font-japanese-display"
             classList={{
@@ -226,10 +258,9 @@ function $RelatedExpression() {
                   $setAnkiFields({
                     ...ankiFieldsSkeleton,
                     ...Object.fromEntries(
-                      Object.entries(note.fields).map(([key, value]) => {
-                        return [key, value.value];
-                      }),
+                      Object.entries(note.fields).map(([key, value]) => [key, value.value ?? ""]),
                     ),
+                    Picture: note.fields.Picture?.value ?? "",
                     CardID: cardId,
                     Tags: note.tags.join(" "),
                     __IS_ROOT__: false,
@@ -253,12 +284,152 @@ function $RelatedExpression() {
   );
 }
 
-export function RelatedExpression() {
+export function RelatedExpressionTrigger() {
   return (
     <ErrorBoundary fallback={null}>
       <Suspense fallback={null}>
-        <$RelatedExpression />
+        <$RelatedExpressionTrigger />
       </Suspense>
     </ErrorBoundary>
+  );
+}
+
+function $RelatedExpressionTrigger() {
+  const { $general } = useGeneralContext();
+  const { $isInitialAnkiFields } = useAnkiFieldContext();
+  const { $hasContent } = useRelatedExpressionNotes();
+  const bp = useBreakpointContext();
+  useRelatedExpressionPlayback();
+
+  const [$show, $setShow] = createSignal(false);
+  const [$anchor, $setAnchor] = createSignal<HTMLElement | null>(null);
+  const [$buttonRef, $setButtonRef] = createSignal<HTMLButtonElement>();
+  const [$tooltipRef, $setTooltipRef] = createSignal<HTMLDivElement>();
+  const [$position, $setPosition] = createStore({ x: 0, y: 0 });
+
+  let hideTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  function clearHideTimeout() {
+    if (hideTimeout) {
+      clearTimeout(hideTimeout);
+      hideTimeout = undefined;
+    }
+  }
+
+  function close() {
+    clearHideTimeout();
+    $setShow(false);
+    $setAnchor(null);
+  }
+
+  function scheduleHide() {
+    clearHideTimeout();
+    hideTimeout = setTimeout(() => {
+      $setShow(false);
+      $setAnchor(null);
+    }, 100);
+  }
+
+  function openFrom(el: HTMLElement) {
+    clearHideTimeout();
+    $setAnchor(el);
+    $setShow(true);
+  }
+
+  function open(event: MouseEvent | TouchEvent | FocusEvent) {
+    if (!(event.currentTarget instanceof HTMLElement)) return;
+    openFrom(event.currentTarget);
+  }
+
+  onMount(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!$hasContent()) return;
+      if (e.key.toLowerCase() !== RELATED_EXPRESSION_TOGGLE_KEY) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const target = e.target;
+      if (
+        target instanceof HTMLElement &&
+        (target.closest("input, textarea, select, [contenteditable=true]") ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      e.preventDefault();
+      if ($show()) close();
+      else {
+        const button = $buttonRef();
+        if (button) openFrom(button);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    onCleanup(() => window.removeEventListener("keydown", handler));
+  });
+
+  onCleanup(() => clearHideTimeout());
+
+  createEffect(() => {
+    const anchor = $anchor();
+    const tooltip = $tooltipRef();
+    if (!$show() || !anchor || !tooltip) return;
+
+    computePosition(anchor, tooltip, {
+      placement: bp.isAtLeast("sm") ? "bottom-end" : "bottom",
+      middleware: [offset({ mainAxis: 6, crossAxis: 0 }), flip(), shift({ padding: 5 })],
+    })
+      .then(({ x, y }) => $setPosition({ x, y }))
+      .catch((e) => {
+        console.error("[RelatedExpression] computePosition failed:", e);
+      });
+  });
+
+  return (
+    <Show when={$hasContent()}>
+      <button
+        type="button"
+        ref={$setButtonRef}
+        class="relative flex items-center cursor-pointer text-base-content-soft hover:text-base-content"
+        classList={{
+          "text-base-content": !$isInitialAnkiFields() || $show(),
+        }}
+        aria-label="Связанные выражения"
+        on:mouseenter={open}
+        on:mouseleave={scheduleHide}
+        on:focusin={open}
+        on:focusout={scheduleHide}
+        on:touchstart={open}
+        on:touchend={(e) => e.stopPropagation()}
+      >
+        <GitPullRequestArrow class="size-4" />
+        <Show when={!$isInitialAnkiFields()}>
+          <span class="status status-info absolute -top-1.5 -right-1.5 scale-75"></span>
+        </Show>
+      </button>
+
+      <Portal mount={$general.layoutRef}>
+        <div
+          ref={$setTooltipRef}
+          class="absolute z-10 overflow-hidden rounded-lg horizontal-tb text-start tooltip tappable shadow-lg"
+          tabindex={0}
+          on:mouseenter={clearHideTimeout}
+          on:mouseleave={scheduleHide}
+          on:focusin={clearHideTimeout}
+          on:focusout={scheduleHide}
+          on:touchstart={clearHideTimeout}
+          style={{
+            display: $show() ? "block" : "none",
+            left: `${$position.x}px`,
+            top: `${$position.y}px`,
+          }}
+        >
+          <div
+            class="relative text-base bg-base-200 z-10 p-2 sm:p-3 border border-base-300 rounded-lg font-cyrillic w-max max-w-[min(20rem,calc(100vw-1.5rem))] shadow-lg"
+            lang="ru"
+            style={{ color: "initial" }}
+          >
+            <RelatedExpressionList />
+          </div>
+        </div>
+      </Portal>
+    </Show>
   );
 }

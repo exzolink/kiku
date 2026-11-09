@@ -3,7 +3,6 @@ import { isServer } from "solid-js/web";
 import { useCardContext } from "#/src/contexts/CardContext";
 import type { DatasetProp } from "#/src/lib/config";
 import { useLoadPlugin } from "#/src/hooks/plugin";
-import { DefinitionPictureRow } from "./DefinitionPictureRow";
 import { FieldGroupPaginationSection } from "./FieldGroupPaginationSection";
 import { PictureSection } from "./PictureSection";
 import { useAnkiFieldContext } from "#/src/contexts/AnkiFieldsContext";
@@ -20,11 +19,11 @@ const Lazy = {
   FieldGroupPagination: lazy(async () => ({ default: (await import("#/src/lazy")).FieldGroupPagination, })),
   UseAnkiDroid: lazy(async () => ({ default: (await import("#/src/lazy")).UseAnkiDroid })),
   Sentence: lazy(async () => ({ default: (await import("#/src/lazy")).Sentence })),
-  RelatedExpression: lazy(async () => ({ default: (await import("#/src/lazy")).RelatedExpression, })),
   Expression: lazy(async () => ({ default: (await import("#/src/lazy")).Expression })),
   Settings: lazy(async () => ({ default: (await import("#/src/lazy")).Settings })),
   CardEnd: lazy(async () => ({ default: (await import("#/src/lazy")).CardEnd })),
   PictureModal: lazy(async () => ({ default: (await import("#/src/lazy")).PictureModal })),
+  DefinitionPicture: lazy(async () => ({ default: (await import("#/src/lazy")).DefinitionPicture })),
 };
 
 export function Front() {
@@ -64,7 +63,6 @@ export function Front() {
         <Match when={$card.page === "main"}>
           <HeaderLayout>{$card.ready && <Lazy.HeaderMain />}</HeaderLayout>
           <div class="flex flex-col">
-            {$card.ready && <Lazy.RelatedExpression />}
             <div
               class="expression-picture-box tappable"
               on:click={() => {
@@ -96,7 +94,7 @@ export function Front() {
             }}
           >
             {$card.ready && !$hidden() && <Lazy.Sentence />}
-            {$card.ready && !$hidden() && <DefinitionPictureRow />}
+            {$card.ready && !$hidden() && <Lazy.DefinitionPicture />}
           </div>
           {$isInitialSide() && (
             <div

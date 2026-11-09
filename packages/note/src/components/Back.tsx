@@ -30,7 +30,7 @@ const Lazy = {
   UseAnkiDroid: lazy(async () => ({ default: (await import("#/src/lazy")).UseAnkiDroid })),
   Expression: lazy(async () => ({ default: (await import("#/src/lazy")).Expression })),
   AnkiMobileDebug: lazy(async () => ({ default: (await import("#/src/lazy")).AnkiMobileDebug })),
-  RelatedExpression: lazy(async () => ({ default: (await import("#/src/lazy")).RelatedExpression, })),
+  PitchInfoBadge: lazy(async () => ({ default: (await import("#/src/lazy")).PitchInfoBadge })),
 };
 
 export function Back(props: { onExitNested?: () => void }) {
@@ -93,9 +93,9 @@ export function Back(props: { onExitNested?: () => void }) {
             {$card.ready && <Lazy.HeaderMain onExitNested={props.onExitNested} />}
           </HeaderLayout>
           <div class="flex flex-col">
-            {$card.ready && <Lazy.RelatedExpression />}
             <div class="expression-picture-box">
               <div class="expression-audio-box">
+                {$card.ready && <Lazy.PitchInfoBadge />}
                 <ExpressionSection />
                 <div
                   class="mt-1 sm:mt-2 gap-2 pitch pitch-field min-h-lh"
@@ -117,10 +117,10 @@ export function Back(props: { onExitNested?: () => void }) {
           </div>
           {$card.ready && <Lazy.BackBody />}
           {$card.ready && (
-            <>
+            <div class="mt-8 flex flex-col gap-3">
               <Lazy.BackFooter />
               <Lazy.AudioButtons position={2} />
-            </>
+            </div>
           )}
           {$card.ready && <Lazy.CardEnd />}
         </Match>

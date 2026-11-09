@@ -6,8 +6,10 @@ import { useConfigContext } from "#/src/contexts/ConfigContext";
 import { useGeneralContext } from "#/src/contexts/GeneralContext";
 import { useRelatedNotes } from "#/src/hooks/notes";
 import { ExternalLinks } from "./ExternalLinks";
+import { FreqSortBadge } from "./FreqSortBadge";
 import { ArrowLeftIcon, BoltIcon, PaintbrushIcon } from "./Icons";
 import { MergeContextModal } from "./MergeContextModal";
+import { RelatedExpressionTrigger } from "./RelatedExpression";
 
 export function HeaderMain(props: { onExitNested?: () => void }) {
   const { $initialSide, $$card, nested, isMergePreview } = useCardContext();
@@ -93,6 +95,10 @@ export function HeaderMain(props: { onExitNested?: () => void }) {
             </Match>
           </Switch>
         </Show>
+        <Show when={$$card.state === "ready"}>
+          <RelatedExpressionTrigger />
+        </Show>
+        <FreqSortBadge />
       </div>
     </>
   );
