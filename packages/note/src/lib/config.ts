@@ -219,7 +219,6 @@ export type Dataset = {
   "data-blur-nsfw": "true" | "false";
   "data-pitch-type": string;
   "data-has-pitch": string;
-  "data-has-hint": string;
   "data-has-picture": string;
   "data-dictionary": string;
 };

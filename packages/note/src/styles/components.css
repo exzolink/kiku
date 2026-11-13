@@ -110,12 +110,6 @@
     }
   }
 
-  .hint-field {
-    display: none;
-    &[data-has-hint="true"] {
-      display: flex;
-    }
-  }
 }
 
 .tooltip.pitch-info-tooltip > .pitch-info-tooltip-content {

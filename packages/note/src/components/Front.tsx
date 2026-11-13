@@ -1,7 +1,6 @@
 import { createMemo, createSignal, lazy, Match, onMount, Show, Switch } from "solid-js";
 import { isServer } from "solid-js/web";
 import { useCardContext } from "#/src/contexts/CardContext";
-import type { DatasetProp } from "#/src/lib/config";
 import { useLoadPlugin } from "#/src/hooks/plugin";
 import { FieldGroupPaginationSection } from "./FieldGroupPaginationSection";
 import { PictureSection } from "./PictureSection";
@@ -49,10 +48,6 @@ export function Front() {
     }
   });
 
-  const $hintFieldDataset = createMemo<DatasetProp>(() => ({
-    "data-has-hint": isServer ? "{{#Hint}}true{{/Hint}}" : $ankiFields.Hint ? "true" : "",
-  }));
-
   return (
     <>
       {$card.ready && !nested && <Lazy.UseAnkiDroid />}
@@ -96,16 +91,6 @@ export function Front() {
             {$card.ready && !$hidden() && <Lazy.Sentence />}
             {$card.ready && !$hidden() && <Lazy.DefinitionPicture />}
           </div>
-          {$isInitialSide() && (
-            <div
-              class={`gap-2 items-center justify-center text-center border-t hint text-base-content-calm hint-field border-base-200 p-2`}
-              {...$hintFieldDataset()}
-            >
-              <div innerHTML={isServer ? undefined : $ankiFields.Hint}>
-                {isServer ? "{{Hint}}" : undefined}
-              </div>
-            </div>
-          )}
           {$card.ready && (
             <Show when={!$isInitialSide()}>
               <Lazy.AudioButtons position={2} />

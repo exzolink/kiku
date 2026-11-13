@@ -1,4 +1,5 @@
 import { createMemo, ErrorBoundary, Match, Show, Switch } from "solid-js";
+import { useAnkiFieldContext } from "#/src/contexts/AnkiFieldsContext";
 import { useCardContext } from "#/src/contexts/CardContext";
 import { useConfigContext } from "#/src/contexts/ConfigContext";
 import { useCtxContext } from "#/src/contexts/CtxContext";
@@ -24,6 +25,9 @@ export function Sentence() {
             <SentenceField />
           </Match>
         </Switch>
+        <Show when={$card.side === "back"}>
+          <SentenceHint />
+        </Show>
       </div>
     );
   }
@@ -52,6 +56,16 @@ function SentenceFieldWithTranslation() {
         innerHTML={$group().sentenceTranslationField}
       ></div>
     </div>
+  );
+}
+
+function SentenceHint() {
+  const { $ankiFields } = useAnkiFieldContext();
+
+  return (
+    <Show when={$ankiFields.Hint}>
+      {(hint) => <div class="hint text-base-content-faint" innerHTML={hint()}></div>}
+    </Show>
   );
 }
 
