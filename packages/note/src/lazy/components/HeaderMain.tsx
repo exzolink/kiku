@@ -14,8 +14,7 @@ import { RelatedExpressionTrigger } from "./RelatedExpression";
 export function HeaderMain(props: { onExitNested?: () => void }) {
   const { $initialSide, $$card, nested, isMergePreview } = useCardContext();
   const { $config, $isConfigOutOfSync } = useConfigContext();
-  const { initialDarkMode, $preStartupTime, $startupTime, isAnkiDroidNewStudyScreen } =
-    useGeneralContext();
+  const { initialDarkMode, $preStartupTime, $startupTime } = useGeneralContext();
   const { navigate } = useNavigationTransition();
   const { $changeThemeNext } = useThemeTransition();
 
@@ -77,15 +76,15 @@ export function HeaderMain(props: { onExitNested?: () => void }) {
       <div class="flex gap-1 sm:gap-2 items-center">
         <Show when={!isMergePreview}>
           <Switch>
-            <Match when={$$card.state === "pending" || $$card.state === "unresolved"}>
-              <span
-                class="loading loading-dots loading-xs text-base-content-faint"
-                classList={{
-                  "me-4": $initialSide() === "front" && isAnkiDroidNewStudyScreen,
-                }}
-              ></span>
+            <Match
+              when={
+                $initialSide() === "back" &&
+                ($$card.state === "pending" || $$card.state === "unresolved")
+              }
+            >
+              <span class="loading loading-dots loading-xs text-base-content-faint"></span>
             </Match>
-            <Match when={$$card.state === "errored"}>
+            <Match when={$initialSide() === "back" && $$card.state === "errored"}>
               <div class="status status-error"></div>
             </Match>
             <Match when={$$card.state === "ready" && $initialSide() === "back"}>
@@ -98,7 +97,9 @@ export function HeaderMain(props: { onExitNested?: () => void }) {
         <Show when={$$card.state === "ready"}>
           <RelatedExpressionTrigger />
         </Show>
-        <FreqSortBadge />
+        <Show when={$initialSide() === "back"}>
+          <FreqSortBadge />
+        </Show>
       </div>
     </>
   );
