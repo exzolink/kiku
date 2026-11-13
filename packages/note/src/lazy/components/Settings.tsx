@@ -606,6 +606,7 @@ function FontSizeSettings() {
               <FontSizeRangeSetting configKey="fontSizeBaseExpression" label="Выражение" />
               <FontSizeRangeSetting configKey="fontSizeBasePitch" label="Тон" />
               <FontSizeRangeSetting configKey="fontSizeBaseSentence" label="Предложение" />
+              <FontSizeRangeSetting configKey="fontSizeBaseTranslation" label="Перевод" />
               <FontSizeRangeSetting configKey="fontSizeBaseMiscInfo" label="Доп. информация" />
               <FontSizeRangeSetting configKey="fontSizeBaseHint" label="Подсказка" />
             </div>
@@ -616,6 +617,7 @@ function FontSizeSettings() {
               <FontSizeRangeSetting configKey="fontSizeSmExpression" label="Выражение" />
               <FontSizeRangeSetting configKey="fontSizeSmPitch" label="Тон" />
               <FontSizeRangeSetting configKey="fontSizeSmSentence" label="Предложение" />
+              <FontSizeRangeSetting configKey="fontSizeSmTranslation" label="Перевод" />
               <FontSizeRangeSetting configKey="fontSizeSmMiscInfo" label="Доп. информация" />
               <FontSizeRangeSetting configKey="fontSizeSmHint" label="Подсказка" />
             </div>
@@ -636,6 +638,9 @@ function FontSizeRangeSetting(props: { configKey: NumStrConfigKey; label: string
     }
     if (props.configKey.includes("Sentence")) {
       return { class: "font-japanese-text", lang: "ja", text: "日本語" };
+    }
+    if (props.configKey.includes("Translation")) {
+      return { class: "font-cyrillic", lang: "ru", text: "Перевод" };
     }
     return { class: "font-cyrillic", lang: "ru", text: "Текст" };
   });

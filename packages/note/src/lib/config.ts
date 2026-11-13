@@ -40,11 +40,13 @@ export type KikuConfig = {
   fontSizeBaseExpression: TailwindSize;
   fontSizeBasePitch: TailwindSize;
   fontSizeBaseSentence: TailwindSize;
+  fontSizeBaseTranslation: TailwindSize;
   fontSizeBaseMiscInfo: TailwindSize;
   fontSizeBaseHint: TailwindSize;
   fontSizeSmExpression: TailwindSize;
   fontSizeSmPitch: TailwindSize;
   fontSizeSmSentence: TailwindSize;
+  fontSizeSmTranslation: TailwindSize;
   fontSizeSmMiscInfo: TailwindSize;
   fontSizeSmHint: TailwindSize;
   layoutMaxWidth: TailwindContainerSize;
@@ -138,11 +140,13 @@ export function validateConfig(config: KikuConfig, logger?: Logger): KikuConfig 
       fontSizeBaseExpression: tailwindSize.includes(config.fontSizeBaseExpression) ? config.fontSizeBaseExpression : defaultConfig.fontSizeBaseExpression,
       fontSizeBasePitch: tailwindSize.includes(config.fontSizeBasePitch) ? config.fontSizeBasePitch : defaultConfig.fontSizeBasePitch,
       fontSizeBaseSentence: tailwindSize.includes(config.fontSizeBaseSentence) ? config.fontSizeBaseSentence : defaultConfig.fontSizeBaseSentence,
+      fontSizeBaseTranslation: tailwindSize.includes(config.fontSizeBaseTranslation) ? config.fontSizeBaseTranslation : defaultConfig.fontSizeBaseTranslation,
       fontSizeBaseMiscInfo: tailwindSize.includes(config.fontSizeBaseMiscInfo) ? config.fontSizeBaseMiscInfo : defaultConfig.fontSizeBaseMiscInfo,
       fontSizeBaseHint: tailwindSize.includes(config.fontSizeBaseHint) ? config.fontSizeBaseHint : defaultConfig.fontSizeBaseHint,
       fontSizeSmExpression: tailwindSize.includes(config.fontSizeSmExpression) ? config.fontSizeSmExpression : defaultConfig.fontSizeSmExpression,
       fontSizeSmPitch: tailwindSize.includes(config.fontSizeSmPitch) ? config.fontSizeSmPitch : defaultConfig.fontSizeSmPitch,
       fontSizeSmSentence: tailwindSize.includes(config.fontSizeSmSentence) ? config.fontSizeSmSentence : defaultConfig.fontSizeSmSentence,
+      fontSizeSmTranslation: tailwindSize.includes(config.fontSizeSmTranslation) ? config.fontSizeSmTranslation : defaultConfig.fontSizeSmTranslation,
       fontSizeSmMiscInfo: tailwindSize.includes(config.fontSizeSmMiscInfo) ? config.fontSizeSmMiscInfo : defaultConfig.fontSizeSmMiscInfo,
       fontSizeSmHint: tailwindSize.includes(config.fontSizeSmHint) ? config.fontSizeSmHint : defaultConfig.fontSizeSmHint,
 
@@ -171,6 +175,8 @@ export type CssVar = {
   "--line-height-base-pitch": string;
   "--font-size-base-sentence": string;
   "--line-height-base-sentence": string;
+  "--font-size-base-translation": string;
+  "--line-height-base-translation": string;
   "--font-size-base-misc-info": string;
   "--line-height-base-misc-info": string;
   "--font-size-base-hint": string;
@@ -182,6 +188,8 @@ export type CssVar = {
   "--line-height-sm-pitch": string;
   "--font-size-sm-sentence": string;
   "--line-height-sm-sentence": string;
+  "--font-size-sm-translation": string;
+  "--line-height-sm-translation": string;
   "--font-size-sm-misc-info": string;
   "--line-height-sm-misc-info": string;
   "--font-size-sm-hint": string;
@@ -241,6 +249,8 @@ export function getCssVar(config: KikuConfig) {
     "--line-height-base-pitch": tailwindFontSizeVar[config.fontSizeBasePitch].lineHeight,
     "--font-size-base-sentence": tailwindFontSizeVar[config.fontSizeBaseSentence].fontSize,
     "--line-height-base-sentence": tailwindFontSizeVar[config.fontSizeBaseSentence].lineHeight,
+    "--font-size-base-translation": tailwindFontSizeVar[config.fontSizeBaseTranslation].fontSize,
+    "--line-height-base-translation": tailwindFontSizeVar[config.fontSizeBaseTranslation].lineHeight,
     "--font-size-base-misc-info": tailwindFontSizeVar[config.fontSizeBaseMiscInfo].fontSize,
     "--line-height-base-misc-info": tailwindFontSizeVar[config.fontSizeBaseMiscInfo].lineHeight,
     "--font-size-base-hint": tailwindFontSizeVar[config.fontSizeBaseHint].fontSize,
@@ -252,6 +262,8 @@ export function getCssVar(config: KikuConfig) {
     "--line-height-sm-pitch": tailwindFontSizeVar[config.fontSizeSmPitch].lineHeight,
     "--font-size-sm-sentence": tailwindFontSizeVar[config.fontSizeSmSentence].fontSize,
     "--line-height-sm-sentence": tailwindFontSizeVar[config.fontSizeSmSentence].lineHeight,
+    "--font-size-sm-translation": tailwindFontSizeVar[config.fontSizeSmTranslation].fontSize,
+    "--line-height-sm-translation": tailwindFontSizeVar[config.fontSizeSmTranslation].lineHeight,
     "--font-size-sm-misc-info": tailwindFontSizeVar[config.fontSizeSmMiscInfo].fontSize,
     "--line-height-sm-misc-info": tailwindFontSizeVar[config.fontSizeSmMiscInfo].lineHeight,
     "--font-size-sm-hint": tailwindFontSizeVar[config.fontSizeSmHint].fontSize,

@@ -47,7 +47,7 @@ function SentenceFieldWithTranslation() {
     <div class="flex flex-col gap-2">
       <SentenceField />
       <div
-        class="text-base text-base-content-calm font-cyrillic"
+        class="sentence-translation text-base-content-calm font-cyrillic"
         lang="ru"
         innerHTML={$group().sentenceTranslationField}
       ></div>

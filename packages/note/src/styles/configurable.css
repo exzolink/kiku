@@ -31,6 +31,11 @@
   line-height: var(--line-height-base-sentence);
 }
 
+.sentence-translation {
+  font-size: var(--font-size-base-translation);
+  line-height: var(--line-height-base-translation);
+}
+
 .misc-info {
   font-size: var(--font-size-base-misc-info);
   line-height: var(--line-height-base-misc-info);
@@ -55,6 +60,11 @@
   .sentence {
     font-size: var(--font-size-sm-sentence);
     line-height: var(--line-height-sm-sentence);
+  }
+
+  .sentence-translation {
+    font-size: var(--font-size-sm-translation);
+    line-height: var(--line-height-sm-translation);
   }
 
   .misc-info {
